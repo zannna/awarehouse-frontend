@@ -3,14 +3,24 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { ReactKeycloakProvider } from '@react-keycloak/web';
+import Keycloak from 'keycloak-js';
+
+const keycloak = new Keycloak({
+  url: 'http://localhost:8092',
+  realm: 'awarehouse',
+  clientId: 'awarehouse-frontend'
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <ReactKeycloakProvider authClient={keycloak}>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </ReactKeycloakProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
