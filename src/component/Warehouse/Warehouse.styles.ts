@@ -35,28 +35,6 @@ border-left: 1px solid #cfcfcf;
 border-right: 1px solid #cfcfcf;
 border-bottom: 1px solid #cfcfcf;
 `;
-export const RowContainer =styled.div`
-max-width:100%;
-border: 1px solid #cfcfcf;
-display:flex;
-justify-content:space-between;
-padding:1em;
-color: #334F5E;
-font-weight: 500;
-font-style: normal;
-font-size:1.2em;
-border-bottom: 0.5px solid #cfcfcf;
-background: #b0bfc942;
-`;
-
-export const BlueMarkText = styled.div`
-color:#344351;
-font-size:1.2em;
-font-weight:300;
-font-family:'Palanquin Dark';
-text-align:center;
-margin:1.5em;
-`
 
 export const ShelfRow = styled.div`
 max-width:100%;
@@ -105,13 +83,6 @@ color: #6A6A6A;
 text-align:center;
 `;
 
-export const ShelfTableHeaderText = styled.div`
-font-family: 'Palanquin Dark';
-font-weight: 400;
-color: #344351;
-text-align:center;
-`;
-
 
 export const GreyMarkText = styled.div`
 font-size:1.2em;
@@ -119,4 +90,20 @@ font-weight:300;
 font-family:'Palanquin Dark';
 text-align:center;
 color:#6A6A6A;;
+`;
+
+export const BlueMarkText = styled.div`
+color:#344351;
+font-size:1.2em;
+font-weight:300;
+font-family:'Palanquin Dark';
+text-align:center;
+margin:1.5em;
+`
+
+export const ShelfTableHeaderText = styled.div`
+font-family: 'Palanquin Dark';
+font-weight: 400;
+color: #344351;
+text-align:center;
 `;

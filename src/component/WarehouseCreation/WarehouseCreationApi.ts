@@ -18,12 +18,14 @@ export async function getAdminGroups(token :string|undefined) : Promise<GroupDat
 
     return response.data;
 }
+
 export interface Warehouse{
     name: string;
     unit: string;
     numberOfRows : number;
     groupIds: string[];
 }
+
 export async function createGroup(name :string, token :string|undefined) {
     const response =await axiosCoreService.post(
         `${GROUP_PATH}`,

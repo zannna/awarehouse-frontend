@@ -1,11 +1,29 @@
-import { Background, Header, LogoContainer, Logo, Line, ViewOption, ArrowDownImage, ActualWarehouse, ActualText, WarehouseSelector, Options,  WarehouseList } from './MainNavigation.styles';
-import { Flex } from '../../styles/globalStyles.styles';
+import { Background, Header, LogoContainer, Logo, Line, ViewOption, ArrowDownImage, ActualWarehouse, ActualText, WarehouseSelector, Options,  WarehouseList, WarehouseText } from './MainNavigation.styles';
+import { Flex, Box } from '../../styles/globalStyles.styles';
 import { useState, useEffect } from 'react';
+import { useCookies } from "react-cookie";
+import {getWarehouses, Warehouse} from './MainNavigationApi';
+import { useKeycloak } from '@react-keycloak/web';
 function MainNavigation() {
     const [showWarehouses, setShowWarehouses] = useState(false);
+    const { keycloak, initialized } = useKeycloak();
+    const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
+    const [ warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    useEffect(() => {
+        const fetchWarehouses = async () => {
+            const fetchedWarehouses= await  getWarehouses(keycloak.token);
+             console.log(fetchedWarehouses);
+            setWarehouses(fetchedWarehouses);
+          };
+        fetchWarehouses();
+    },[]);
     const handleMouseLeave = () => {
         setShowWarehouses(false)
       }
+    const setChangeChoosenWarehouse= (warehouseId :string, warehouseName :string) => {
+        setCookie("warehouseId", warehouseId);
+        setCookie("warehouseName", warehouseName);
+    }
     return (<Background direction="column">
      <Header>
             <LogoContainer direction='row' align="center"> 
@@ -36,17 +54,18 @@ function MainNavigation() {
             </Options>
             <ActualWarehouse direction='column'>
                 <ActualText>
-                    actual:
+                    actual: 
                 </ActualText>
                 <WarehouseSelector>
-                    <div id="choosenWarehouse" onClick={()=>{setShowWarehouses(!showWarehouses)}}>Warehouse 1 <ArrowDownImage src="/arrow-down.svg" alt="arrow down" ></ArrowDownImage></div>
-                    {showWarehouses && < WarehouseList  onMouseLeave={handleMouseLeave}>
-                        <div> group1 </div>
-                        <div>Warehouse 2</div>
-                        <div>Warehouse 3</div>
-                        <div>Warehouse 4</div>
-                        </ WarehouseList >
-                        }
+                    <div id="choosenWarehouse" onClick={()=>{setShowWarehouses(!showWarehouses)}}>{cookies.warehouseName}<ArrowDownImage src="/arrow-down.svg" alt="arrow down" ></ArrowDownImage></div>
+                    {showWarehouses && (
+                        <WarehouseList onMouseLeave={handleMouseLeave}>
+                            { 
+                                warehouses.map((warehouse) => (
+                                    <WarehouseText key={warehouse.id} onClick={()=>{setChangeChoosenWarehouse(warehouse.id, warehouse.name)}}>{warehouse.name}</WarehouseText>
+                                ))}
+                        </WarehouseList>
+                    )}
                 </WarehouseSelector>
             </ActualWarehouse>
          

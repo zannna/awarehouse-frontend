@@ -21,6 +21,7 @@ export const ProductsFromWarehouse = styled.div`
  border-radius: 20px;
  padding:0.5em;
  margin-right:1.5em;
+ min-width:4em;
 `;
 
 export const  AddWarehouseContainer = styled.div`

@@ -1,17 +1,21 @@
 import {
   AmountCell, Background, PhotoCell, ProductsTable, ProductTr, RowCell, IdCell, WarehouseCell, ShelfCell, TierCell, NameCell, PriceCell, FirstIdCell,
-  FirstWarehouseCell, FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AddWarehouseImage, CreationBox, CreationText, CreationInputContainer, CreationInput, ShortCreationInput, CreateButton, CancelButton
+  FirstWarehouseCell, FirstBaseCell,  FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AddWarehouseImage, BaseCell
 } from './ProductsPage.styles';
 import MainNavigation from '../Header/MainNavigation';
 import ProductWarehouse from './ProductWarehouses/ProductWarehouses'
 import Selection from './Selection/Selection';
-import { Flex, Image, GreenText, SmallText, Line, SmallLine, Checkbox } from '../../styles/globalStyles.styles';
+import ProductCreator from './ProductCreator/ProductCreator';
+import { Flex, Image, GreenText, SmallText, Line, SmallLine, Checkbox} from '../../styles/globalStyles.styles';
 import Filter from './Filter/Filter';
 import { useState, useEffect } from 'react';
 import { Product } from '../../types/types';
+import { useKeycloak } from '@react-keycloak/web';
 function Products() {
-  const [showCreationBox, setShowCreationBox] = useState(false);
+  const [showProductCreator, setShowProductCreator] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
+  const { keycloak, initialized } = useKeycloak();
+  
   const handleCheckboxChange = (product: Product) => {
     const isProductSelected = selectedProducts.some(selectedProduct => selectedProduct.id === product.id)
     if (isProductSelected) {
@@ -20,7 +24,7 @@ function Products() {
       setSelectedProducts([...selectedProducts, product]);
     }
   };
-  
+
 
   return (<Background>
     <MainNavigation />
@@ -32,7 +36,7 @@ function Products() {
         <GreenText> add new</GreenText>
         <Line />
         <Image src="/pointer.svg" alt="pointer" width="0.8em" opacity="0.8"></Image>
-        <SmallText onClick={() => { setShowCreationBox(true) }}>manually</SmallText>
+        <SmallText onClick={() => { setShowProductCreator(true) }}>manually</SmallText>
         <SmallLine />
         <Image src="/file.svg" alt="file" width="1em" opacity="0.4"></Image>
         <SmallText>from file</SmallText>
@@ -53,6 +57,7 @@ function Products() {
         <FirstNameCell>name</FirstNameCell>
         <FirstAmountCell>amount</FirstAmountCell>
         <FirstPriceCell>price</FirstPriceCell>
+        <FirstBaseCell>size</FirstBaseCell>
         <MarkCell>mark</MarkCell>
       </ProductTr>
 
@@ -66,6 +71,7 @@ function Products() {
         <NameCell>Name</NameCell>
         <AmountCell>Amount</AmountCell>
         <PriceCell>Price</PriceCell>
+        <BaseCell>5x6x7</BaseCell>
         <Checkbox type="checkbox" onChange={() => handleCheckboxChange({
           id: '1',
           name: 'Example Product',
@@ -77,7 +83,6 @@ function Products() {
           tier: 'tier'
         })}></Checkbox>
       </ProductTr>
-
       <ProductTr>
         <IdCell>e7e9cd06-ab14-11ee-a506-0242ac120002</IdCell>
         <WarehouseCell>Warehouse</WarehouseCell>
@@ -99,54 +104,7 @@ function Products() {
           tier: 'tier'
         })}></Checkbox>
       </ProductTr>
-      {showCreationBox &&
-        <CreationBox>
-          <CreationText> create product </CreationText>
-          <CreationInputContainer>
-            <Flex gap="5em">
-              <Flex gap="1em">
-                name
-                <CreationInput></CreationInput>
-              </Flex>
-              <Flex>
-                price
-                <ShortCreationInput></ShortCreationInput>
-              </Flex>
-              <Flex>
-                amount
-                <ShortCreationInput></ShortCreationInput>
-              </Flex>
-            </Flex>
-            <Flex gap="5em" width='100%' align='center' justify='center'>
-              <Flex gap="1em"> warehouse
-                <CreationInput></CreationInput></Flex>
-              <Flex gap="1em">no. row
-                <ShortCreationInput></ShortCreationInput></Flex>
-              <Flex >no. shelf
-                <ShortCreationInput></ShortCreationInput></Flex>
-              <Flex>no. tier
-                <ShortCreationInput></ShortCreationInput></Flex>
-            </Flex>
-            <Flex gap="5em" width='100%' align='center' justify='center'>
-              <Flex gap="1em"> width
-                <CreationInput></CreationInput></Flex>
-              <Flex gap="1em"> height
-                <ShortCreationInput></ShortCreationInput></Flex>
-              <Flex > length
-                <ShortCreationInput></ShortCreationInput></Flex>
-            </Flex>
-            <Flex gap="4em" marginBottom='4em' marginTop='2em'>
-              <CancelButton onClick={() => { setShowCreationBox(false) }}>
-                cancel
-              </CancelButton>
-              <CreateButton>
-                create
-              </CreateButton>
-            </Flex>
-          </CreationInputContainer>
-        </CreationBox>
-
-      }
+      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator}/> }
     </ProductsTable>
   </Background>)
 }

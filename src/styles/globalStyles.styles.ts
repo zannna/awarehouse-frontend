@@ -77,6 +77,9 @@ export const Background = styled(Flex)`
   min-height: 100%;
   max-width: 100%;
   padding: 4em; 
+  //to może być zleeeee
+  display: flex;
+  flex-direction: column;
 `;
 
 

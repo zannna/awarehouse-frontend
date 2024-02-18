@@ -4,8 +4,7 @@ import { useState, useEffect} from 'react';
 import { GroupData,  createGroup } from '../WarehouseCreationApi';
 import { useKeycloak } from "@react-keycloak/web";
 import { useRef } from "react";
-function Selector({ selectorId , initialItems,  onSelectedItemChange: onSelectedGroupChange}: { selectorId :string, initialItems: GroupData[],   onSelectedItemChange :  (selectorId :string, item: GroupData) => void}) {
-  const [items, setItems] = useState<GroupData[]>(initialItems);
+function Selector({ selectorId , groups, setGroups, onSelectedGroupChange}: { selectorId :string, groups: GroupData[], setGroups : React.Dispatch<React.SetStateAction<GroupData[]>>,  onSelectedGroupChange :  (selectorId :string, item: GroupData) => void}) {
   const [isListVisible, setListVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<GroupData>();
   const [showGroupCreation, setShowGroupCreation]  = useState(false);
@@ -30,12 +29,11 @@ function Selector({ selectorId , initialItems,  onSelectedItemChange: onSelected
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    }});
+    }});    
     
     async function sendCreateGroupRequest(){
       const newGroup= await createGroup(groupName, keycloak.token); 
-      console.log(newGroup);
-      setItems(currentItems => [...currentItems, newGroup]);
+      groups.push(newGroup);
       setSelectedItem(newGroup);
       setShowGroupCreation(false);
       onSelectedGroupChange(selectorId, newGroup);
@@ -51,7 +49,7 @@ function Selector({ selectorId , initialItems,  onSelectedItemChange: onSelected
       </Flex>
       {(isListVisible || showGroupCreation) && (
       <SelectList>
-        {items.map((item) => (
+        {groups.map((item) => (
           <ListItem key={item.id} onClick={() => handleItemClick(item)}>
             {item.name}
           </ListItem>

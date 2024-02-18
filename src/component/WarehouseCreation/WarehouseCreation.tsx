@@ -3,9 +3,10 @@ import { Flex, Text, BlueText, Image, GridItem  } from '../../styles/globalStyle
 import  WarehouseCreationSelector  from './WarehouseCreationSelector/WarehouseCreationSelector';
 import Selector  from '../Selector/Selector';
 import { getAdminGroups, GroupData,  createWarehouse, Warehouse } from './WarehouseCreationApi';
-import { useEffect, useState } from 'react';
+import { useEffect, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useKeycloak } from '@react-keycloak/web';
-import {unitMap} from '../../constants/UnitConstants'
+import {unitMap} from '../../constants/MapConstants'
 import { CookiesProvider, useCookies } from "react-cookie";
 import React from 'react'
 function WarehouseCreation(){
@@ -16,27 +17,35 @@ function WarehouseCreation(){
     const [selectorGroupComponents, setSelectorGroupComponents] = useState<React.ReactElement[]>([]);
     const [name, setName] = useState("");
     const [numberOfRows, setNumberOfRows] = useState(0);
-    const [unit, setUnit] = useState("");
+    const [unit, setUnit] = useState<string[]>([])
     const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
+    const [nameIsValid, setNameIsValid] = useState(true);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchGroups = async () => {
-          const fetchedGroups = await getAdminGroups(keycloak.token);
-          console.log(fetchedGroups);
+          const fetchedGroups= await getAdminGroups(keycloak.token);
           setGroups(fetchedGroups);
+          setIsInitialized(true);
+        };
+          fetchGroups();
+      }, []);
+
+      useEffect(() => {
+        if(selectorGroupComponents.length === 0 && isInitialized==true){
           const initialSelector = (
             <WarehouseCreationSelector
               key="selector-0"
               selectorId="selector-0"
-              initialItems={fetchedGroups}
-              onSelectedItemChange={handleGroupSelectedItemChange}
+              groups={groups}
+              setGroups={setGroups}
+              onSelectedGroupChange={handleGroupSelectedItemChange}
             />
           );
           setSelectorGroupComponents([initialSelector]);
-        };
-      
-        fetchGroups();
-      }, []);
+        }
+      }, [isInitialized]);
 
     const handleGroupSelectedItemChange = (selectorId :string, item :GroupData) => {
         setSelectedGroup(prevItems => ({
@@ -58,23 +67,33 @@ function WarehouseCreation(){
     const addNewGroupSelector = () => {
         const selectorId = `selector-${Object.keys(selectorGroupComponents).length}`;
         console.log(selectedGroup);
-        console.log(Object.keys(selectedGroup).length);
-        const newSelector = <WarehouseCreationSelector  key={selectorId} selectorId={selectorId} initialItems={groups}  onSelectedItemChange={ handleGroupSelectedItemChange} />;
-        setSelectorGroupComponents([...selectorGroupComponents, newSelector]);
+        const newSelector = <WarehouseCreationSelector  key={selectorId} selectorId={selectorId} groups={groups} setGroups={setGroups}  onSelectedGroupChange={ handleGroupSelectedItemChange} />;
+        setSelectorGroupComponents((prevSelectors) =>[...prevSelectors, newSelector]);
       };
 
-    const sendWarehouseCreationRequest= async () =>{
-      const groupIds = Object.values(selectedGroup).map(group => group.id);
-      const warehouseCreation: Warehouse = {
-        name: name,
-        numberOfRows: numberOfRows,
-        unit: "METER",
-        groupIds: groupIds
+    const isWarehouseCreationValid = () => {
+        if(name ===''){
+          setNameIsValid(false);
+          return false;
+        }
+        return true;
     }
-    console.log(warehouseCreation);
-       const warehouse= await createWarehouse(keycloak.token, warehouseCreation);
-       setCookie("warehouseId", warehouse.id);
-       setCookie("warehouseName", warehouse.name);
+    const sendWarehouseCreationRequest= async () =>{
+      if( isWarehouseCreationValid()){
+        const groupIds = Object.values(selectedGroup).map(group => group.id);
+        const warehouseCreation: Warehouse = {
+          name: name,
+          numberOfRows: numberOfRows,
+          unit: "METER",
+          groupIds: groupIds
+      }
+      console.log(warehouseCreation);
+      const warehouse= await createWarehouse(keycloak.token, warehouseCreation);
+      setCookie("warehouseId", warehouse.id);
+      setCookie("warehouseName", warehouse.name);
+      navigate('/p');
+      }
+
   }
     
 return (<Background>
@@ -85,7 +104,7 @@ return (<Background>
         <BlueText>create warehouse</BlueText>
         < InputWrapper>
         <InputText>name</InputText>
-            <Input isValid={true}  onChange={event => setName(event.target.value)}></Input>
+            <Input isValid={nameIsValid}  onChange={event => setName(event.target.value)}></Input>
         </ InputWrapper>
         <InputWrapper>
             <Text>number of rows</Text>
@@ -96,14 +115,14 @@ return (<Background>
         </InputWrapper>
         <SelectorWrapper>
             <InputText>unit</InputText>
-            <Selector  items={unitMap} setSelected={setUnit}></Selector>
+            <Selector  items={unitMap} selected={unit} setSelected={setUnit}></Selector>
         </SelectorWrapper>
         <Flex direction='column' gap='0.5em'>
             <SelectorWrapper>
                 <InputText>groups</InputText>
                 {selectorGroupComponents[0]}
                 <Flex>
-                    <Image src="/square-minus.svg" alt="down" width="1.5em" opacity='70%' onClick={()=>addNewGroupSelector()}/>
+                    <Image src="/square-minus.svg" alt="down" width="1.5em" opacity='70%' onClick={()=>removeGroupSelector(selectorGroupComponents[0].key)}/>
                     <Image src="/square-add.svg" alt="down" width="1.5em" opacity='50%' onClick={()=>addNewGroupSelector()}/>   
                 </Flex>
             </SelectorWrapper>

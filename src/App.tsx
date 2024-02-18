@@ -27,7 +27,11 @@ function App() {
           }
         />
       {/* <Route path="/" element={<Warehouse />} /> */}
-      <Route path="/p" element={<Products />} />
+      <Route path="/p" element={
+        <PrivateRoutes>
+         <Products />
+      </PrivateRoutes>
+      } />
       <Route path="/pw" element={<ProductsInWarehouse/>} />
       <Route path="/f" element={<FreePlace/>} />
       <Route path="/g"element={<Group/>}/>

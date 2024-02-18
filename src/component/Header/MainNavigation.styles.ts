@@ -95,3 +95,8 @@ margin-top: 0.7em;
 padding:1em;
 margin-left: -0.7em;
 `;
+
+export const WarehouseText = styled.div`
+padding: 0.3em;
+cursor: pointer; 
+`;
