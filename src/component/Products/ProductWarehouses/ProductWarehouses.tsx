@@ -3,21 +3,23 @@ import { ProductsFromWarehouse, ShowProductFromText, AddWarehouseImage, ShowProd
 import { Flex } from '../../../styles/globalStyles.styles';
 import { useState, useEffect } from 'react';
 import { useCookies } from "react-cookie";
-import { getWarehouses, Warehouse } from '../ProductsApi';
+import { getWarehouses, Warehouse,  getGroupsWithWarehouses, GroupWithWarehouses, Group} from '../ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
-function ProductWarehouse() {
+function ProductWarehouse({selectedWarehouses, setSelectedWarehouses, selectedGroup, setSelectedGroup} : {selectedWarehouses: Warehouse[], setSelectedWarehouses: (warehouses: Warehouse[]) => void,
+   selectedGroup: Group[], setSelectedGroup: (groups: Group[]) => void}) {
   const [showProductWarehouses, setShowProductWarehouses] = useState(false);
   const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
   const [ warehouses, setWarehouses] = useState<Warehouse[]>([]);
-  const [ selectedWarehouses, setSelectedWarehouses] = useState<Warehouse[]>([{ id: cookies.warehouseId, name: cookies.warehouseName }]);
+  const [groupsWithWarehouses, setGroupsWithWatehouses] = useState<GroupWithWarehouses[]>([]);
   const { keycloak, initialized } = useKeycloak();
+ 
   useEffect(() => {
-      const fetchWarehouses = async () => {
-          const fetchedWarehouses= await  getWarehouses(keycloak.token);
-           console.log(fetchedWarehouses);
-          setWarehouses(fetchedWarehouses);
+      const fetchGroups = async () => {
+          const fetchedGroups= await getGroupsWithWarehouses(keycloak.token);
+           console.log(fetchedGroups);
+           setGroupsWithWatehouses(fetchedGroups);
         };
-      fetchWarehouses();
+      fetchGroups();
   },[]);
 
   useEffect(() => {
@@ -36,9 +38,19 @@ function ProductWarehouse() {
 
   const handleWarehouseSelection = (warehouseId: string, warehouseName :string, isChecked: boolean) => {
     if (isChecked) {
-      setSelectedWarehouses(prev => [...prev,  { id: warehouseId, name: warehouseName }]);
+      setSelectedWarehouses( [...selectedWarehouses,  { id: warehouseId, name: warehouseName }]);
     } else {
-      setSelectedWarehouses(prev => prev.filter(w => w.id !== warehouseId));
+      setSelectedWarehouses(selectedWarehouses.filter(w => w.id !== warehouseId));
+    }
+  };
+
+  const addGroupAndAllWarehouses = (group :Group, allWarehouses: Warehouse[], isChecked: boolean) => {
+    if (isChecked) {
+      const newWarehouses = allWarehouses.filter(warehouse => !selectedWarehouses.some(w => w.id === warehouse.id));
+      setSelectedWarehouses([...selectedWarehouses, ...newWarehouses]);
+      setSelectedGroup([...selectedGroup, group]);
+    } else {
+       setSelectedGroup(selectedGroup.filter(g => g.id !== group.id));
     }
   };
 
@@ -53,29 +65,22 @@ function ProductWarehouse() {
       <AddWarehouseImage src="/add.svg" alt="add warehouse" onClick={() => { setShowProductWarehouses(!showProductWarehouses) }}></AddWarehouseImage>
       {showProductWarehouses && 
       <ProductWarehouseList onMouseLeave={handleMouseLeave}>
-          {warehouses.map((warehouse) => (
-            <WarehouseText key={warehouse.id}>
-              {warehouse.name}  
-              <Checkbox type="checkbox"  
-                checked={selectedWarehouses.some(w => w.id === warehouse.id)}
-                onChange={(e) => handleWarehouseSelection(warehouse.id, warehouse.name, e.target.checked)}>
-              </Checkbox>
-            </WarehouseText>
-        ))}
+           {groupsWithWarehouses.map((groupWithWarehouses) => (
+            <>
+                  <GroupText key={groupWithWarehouses.group.id}>{groupWithWarehouses.group.name}<Checkbox type="checkbox" onClick={(e)=>addGroupAndAllWarehouses(groupWithWarehouses.group, groupWithWarehouses.warehouses, (e.target as HTMLInputElement).checked)}></Checkbox></GroupText>
+                  {groupWithWarehouses.warehouses.map((warehouse) => ( 
+                     <WarehouseText key={warehouse.id}>{warehouse.name}
+                     <Checkbox type="checkbox" 
+                      checked={selectedWarehouses.some(w => w.id === warehouse.id)}
+                      onChange={(e) => handleWarehouseSelection(warehouse.id, warehouse.name, e.target.checked)}
+                      ></Checkbox></WarehouseText>
+
+                  ))}
+            </>))
+}
+
       </ProductWarehouseList>      
-      // <ProductWarehouseList onMouseLeave={handleMouseLeave}>
-      //   <GroupText>group 1  <Checkbox type="checkbox" ></Checkbox></GroupText>
-      //   <WarehouseText><span>Warehouse 2</span><Checkbox type="checkbox" ></Checkbox></WarehouseText>
-      //   <WarehouseText>Warehouse 3 <Checkbox type="checkbox" ></Checkbox></WarehouseText>
-      //   <GroupText>group 2  <Checkbox type="checkbox" ></Checkbox></GroupText>
-      //   <WarehouseText>Warehouse 4 <Checkbox type="checkbox" ></Checkbox></WarehouseText>
-      // </ ProductWarehouseList >
-    //   <ProductWarehouseList onMouseLeave={handleMouseLeave}>
-    //     <WarehouseText><span>Warehouse 2</span><Checkbox type="checkbox" ></Checkbox></WarehouseText>
-    //     <WarehouseText>Warehouse 3 <Checkbox type="checkbox" ></Checkbox></WarehouseText>
-    //     <WarehouseText>Warehouse 4 <Checkbox type="checkbox" ></Checkbox></WarehouseText>
-    // </ ProductWarehouseList >
-      }
+}
     </AddWarehouseContainer>
   </ShowProductFromContainer>
 

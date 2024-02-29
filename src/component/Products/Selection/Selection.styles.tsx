@@ -4,6 +4,7 @@ export const RemoveText = styled.div`
 color: #771035;
 font-size: 0.8em;
 margin-right: 2em;
+cursor: pointer;
 `;
 
 export const SelectAllText = styled.div`

@@ -23,6 +23,7 @@ function MainNavigation() {
     const setChangeChoosenWarehouse= (warehouseId :string, warehouseName :string) => {
         setCookie("warehouseId", warehouseId);
         setCookie("warehouseName", warehouseName);
+        window.location.reload();
     }
     return (<Background direction="column">
      <Header>

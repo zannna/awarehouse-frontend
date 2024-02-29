@@ -73,12 +73,12 @@ font-size:1.1em;
 export const ProductGrid = styled.div`
   display: grid; 
   grid-template-columns: 1fr 0.7fr 1fr; 
-  grid-template-rows: 1fr 1fr 1fr 1fr; 
   gap: 3em 5em; 
   width: 100%; 
   grid-template-areas: 
   ". . ."
   ". . ."
   "groups . ."
+  "photo . ."
   "warehouse . .";
 `;

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_VERSION_URI = '/api/v1';
+export const API_VERSION_URI = '/api/v1';
 
 export const CORE_SERVICE = 'http://localhost:8080'
 
@@ -15,3 +15,4 @@ export const axiosCoreService = axios.create({
         'Content-Type': 'application/json'
     },
 });
+

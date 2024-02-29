@@ -27,9 +27,9 @@ function ProductsInWarehouse() {
     <ShelfTable>
       <Background>
         <MainNavigation />
-        <Filter />
+        {/* <Filter /> */}
         <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
-          <Selection products={selectedProducts} ></Selection>
+          {/* <Selection products={selectedProducts} ></Selection> */}
         </Flex>
         <RowText>Row I</RowText>
         <ShelvesText>shelves:</ShelvesText>

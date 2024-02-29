@@ -63,6 +63,8 @@ export const GroupText = styled.div`
     font-size: 1em;
     margin-top:1em;
     margin-bottom:1em;
+    text-decoration: underline;
+    text-underline-offset: 6px;
 `;
 
 export const WarehouseText = styled.div`

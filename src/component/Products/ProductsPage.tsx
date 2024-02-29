@@ -1,35 +1,96 @@
 import {
   AmountCell, Background, PhotoCell, ProductsTable, ProductTr, RowCell, IdCell, WarehouseCell, ShelfCell, TierCell, NameCell, PriceCell, FirstIdCell,
-  FirstWarehouseCell, FirstBaseCell,  FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AddWarehouseImage, BaseCell
+  FirstWarehouseCell, FirstBaseCell, FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AddWarehouseImage, BaseCell
 } from './ProductsPage.styles';
 import MainNavigation from '../Header/MainNavigation';
 import ProductWarehouse from './ProductWarehouses/ProductWarehouses'
 import Selection from './Selection/Selection';
 import ProductCreator from './ProductCreator/ProductCreator';
-import { Flex, Image, GreenText, SmallText, Line, SmallLine, Checkbox} from '../../styles/globalStyles.styles';
+import { Flex, Image, GreenText, SmallText, Line, SmallLine, Checkbox } from '../../styles/globalStyles.styles';
 import Filter from './Filter/Filter';
 import { useState, useEffect } from 'react';
-import { Product } from '../../types/types';
+import { Product, Warehouse, Group } from './ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
+import { getProducts } from './ProductsApi';
+import { useCookies } from "react-cookie";
+import Pagination from '../Pagination/Pagination';
 function Products() {
   const [showProductCreator, setShowProductCreator] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
+  const [selectedProductsMap, setSelectedProductsMap] = useState<Map<number, Product>>(new Map());
   const { keycloak, initialized } = useKeycloak();
-  
-  const handleCheckboxChange = (product: Product) => {
-    const isProductSelected = selectedProducts.some(selectedProduct => selectedProduct.id === product.id)
-    if (isProductSelected) {
-      setSelectedProducts(selectedProducts.filter(selectedProduct => selectedProduct.id !== product.id));
-    } else {
-      setSelectedProducts([...selectedProducts, product]);
-    }
+  const [cookies] = useCookies(["warehouseId", "warehouseName"]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedWarehouses, setSelectedWarehouses] = useState<Warehouse[]>([{ id: cookies.warehouseId, name: cookies.warehouseName }]);
+  const pageSize = 2;
+  const [actualPage, setActualPage] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [visiblePageRange, setVisiblePageRange] = useState({ start: 0, end: 0 });
+  const [searchConditions, setSearchConditions] = useState<{ [key: string]: string }>({});
+  const [sortConditions, setSortConditions] = useState({});
+  const [selectedGroup, setSelectedGroup] = useState<Group[]>([]);
+
+  const updateSearchConditions = (key: string, value: string) => {
+    setSearchConditions(prevConditions => {
+      if (prevConditions.hasOwnProperty(key)) {
+        const { [key]: removed, ...newConditions } = prevConditions;
+        return newConditions;
+      } else {
+        return {
+          ...prevConditions,
+          [key]: value,
+        };
+      }
+    });
   };
+
+  useEffect(() => {
+    if (selectedWarehouses && selectedWarehouses.length > 0) {
+      const warehouseIds = selectedWarehouses.map(warehouse => warehouse.id);
+      const groupIds = selectedGroup.map(group => group.id);
+      getProducts(keycloak.token, warehouseIds, sortConditions, searchConditions, groupIds, actualPage, pageSize).then((products) => {
+        console.log(products);
+        setProducts(products.content);
+        setPages(products.totalPages);
+        if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
+          let newStart = Math.max(0, actualPage - 2);
+          let newEnd = 4;
+          if (actualPage > 2)
+            newEnd = Math.min(products.totalPages - 1, actualPage + 2);
+          setVisiblePageRange({ start: newStart, end: newEnd });
+        }
+      }).catch(error => {
+        console.error("Failed to fetch products:", error);
+        setProducts([]);
+      });
+    }
+  }, [selectedWarehouses, actualPage, searchConditions, sortConditions, selectedGroup]);
+
+
+  const handleCheckboxChange = (uniqueId :number, product :Product, isChecked :boolean) => {
+    setSelectedProductsMap(prevMap => {
+      const newMap = new Map(prevMap);
+  
+      if (isChecked) {
+        newMap.set(uniqueId, product);
+      } else {
+        newMap.delete(uniqueId);
+      }
+  
+      return newMap;
+    });
+  };
+
+  const addSelectedProduct = (product: Product) => {
+    setProducts([...products, product]);
+  };
+
 
 
   return (<Background>
     <MainNavigation />
-    <ProductWarehouse />
-    <Filter/>
+    <ProductWarehouse selectedWarehouses={selectedWarehouses} setSelectedWarehouses={setSelectedWarehouses}
+      selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+    <Filter updateSearch={searchConditions} updateSearchConditions={updateSearchConditions} sortConditions={sortConditions} setSortConditions={setSortConditions} />
     <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
       <Flex align="center">
         <Image src="/add.svg" alt="add warehouse" width="1.2em"></Image>
@@ -44,67 +105,64 @@ function Products() {
         <Image src="/website.svg" alt="website" width="1em"></Image>
         <SmallText> from site</SmallText>
       </Flex>
-      <Selection  products={selectedProducts} ></Selection>
+      <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products} setProducts={setProducts}></Selection>
     </Flex>
     <ProductsTable>
-      <ProductTr>
+      <ProductTr isSelected={false}>
         <FirstIdCell>id</FirstIdCell>
-        <FirstWarehouseCell >warehouse</FirstWarehouseCell >
-        <FirstRowCell>row</FirstRowCell>
-        <FirstShelfCell>shelf</FirstShelfCell>
-        <FirstTierCell>tier</FirstTierCell>
         <FirstPhotoCell>photo</FirstPhotoCell>
         <FirstNameCell>name</FirstNameCell>
         <FirstAmountCell>amount</FirstAmountCell>
         <FirstPriceCell>price</FirstPriceCell>
         <FirstBaseCell>size</FirstBaseCell>
+        <FirstBaseCell>group</FirstBaseCell>
+        <FirstWarehouseCell >warehouse</FirstWarehouseCell >
+        <FirstRowCell>row</FirstRowCell>
+        <FirstShelfCell>shelf</FirstShelfCell>
+        <FirstTierCell>tier</FirstTierCell>
         <MarkCell>mark</MarkCell>
       </ProductTr>
+      {products.map((product, index) => (
+        <ProductTr key={index} isSelected={product.productWarehouses?.at(0) ? false : true}>
+          <IdCell>{product.id}</IdCell>
+          <PhotoCell>
+            <Flex width='100%' justify='center'>
+              {product.image ? <Image src={`data:image/jpeg;base64,${product.image}`} alt="Product" height='80px' width='80px' opacity='100%' /> : ''}
+            </Flex>
+          </PhotoCell>
+          <NameCell>{product.title}</NameCell>
+          <AmountCell>{product.productWarehouses?.at(0) ? product.productWarehouses?.at(0)?.amount : product.amount}</AmountCell>
+          <PriceCell>{`${product.price?.amount} ${product.price?.currency}`}</PriceCell>
+          <BaseCell>
+            {`${product?.dimensions?.width ?? 0}x${product?.dimensions?.height ?? 0}x${product?.dimensions?.length ?? 0}`}
+          </BaseCell>
+          <BaseCell>{product.group?.name}</BaseCell>
+          <WarehouseCell>
+            {product.productWarehouses?.at(0)?.warehouseName}
+          </WarehouseCell>
+          <RowCell>
+            {product.productWarehouses?.at(0)?.row}
+          </RowCell>
+          <ShelfCell>
+            {product.productWarehouses?.at(0)?.shelfNumber}
+          </ShelfCell>
+          <TierCell>
+            {product.productWarehouses?.at(0)?.tierNumber}
+          </TierCell>
+          <MarkCell>
+            <Checkbox
+              type="checkbox"
+              checked={selectedProductsMap.has(index)}
+              onChange={(e) => handleCheckboxChange(index, product,  e.target.checked)}
+            />
+          </MarkCell>
+        </ProductTr>
+      ))}
 
-      <ProductTr>
-        <IdCell>d69bcdec-ab14-11ee-a506-0242ac120002</IdCell>
-        <WarehouseCell>Warehouse</WarehouseCell>
-        <RowCell>Row</RowCell>
-        <ShelfCell>Shelf</ShelfCell>
-        <TierCell>Tier</TierCell>
-        <PhotoCell>Photo</PhotoCell>
-        <NameCell>Name</NameCell>
-        <AmountCell>Amount</AmountCell>
-        <PriceCell>Price</PriceCell>
-        <BaseCell>5x6x7</BaseCell>
-        <Checkbox type="checkbox" onChange={() => handleCheckboxChange({
-          id: '1',
-          name: 'Example Product',
-          amount: '500',
-          photo: 'example.jpg',
-          warehouse: 'warehouse',
-          row: 'row',
-          shelf: 'shelf',
-          tier: 'tier'
-        })}></Checkbox>
-      </ProductTr>
-      <ProductTr>
-        <IdCell>e7e9cd06-ab14-11ee-a506-0242ac120002</IdCell>
-        <WarehouseCell>Warehouse</WarehouseCell>
-        <RowCell>Row</RowCell>
-        <ShelfCell>Shelf</ShelfCell>
-        <TierCell>Tier</TierCell>
-        <PhotoCell>Photo</PhotoCell>
-        <NameCell>Name</NameCell>
-        <AmountCell>Amount</AmountCell>
-        <PriceCell>Price</PriceCell>
-        <Checkbox type="checkbox" onChange={() => handleCheckboxChange({
-          id: '1',
-          name: 'Example Product',
-          amount: '500',
-          photo: 'example.jpg',
-          warehouse: 'warehouse',
-          row: 'row',
-          shelf: 'shelf',
-          tier: 'tier'
-        })}></Checkbox>
-      </ProductTr>
-      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator}/> }
+      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} addProduct={addSelectedProduct} />}
+      <Flex width='100%' justify='flex-end' marginTop='2em'>
+        <Pagination actualPage={actualPage} setActualPage={setActualPage} startPage={visiblePageRange.start} endPage={visiblePageRange.end} setVisiblePageRange={setVisiblePageRange} pages={pages}></Pagination>
+      </Flex>
     </ProductsTable>
   </Background>)
 }

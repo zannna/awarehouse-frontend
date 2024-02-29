@@ -20,7 +20,7 @@ export const Background = styled.div`
 export const BaseCell = styled.div`
   white-space: pre-wrap;
   word-wrap: break-word;
-  text:center; 
+  text-align:center; 
   padding:1em;  
   border-right: 1px solid #E0E0E0;
   color: #334F5E;
@@ -73,6 +73,7 @@ export const FirstTierCell = styled(FirstBaseCell)`
 
 export const PhotoCell = styled(BaseCell)`
   grid-area: photo;
+
 `;
 
 export const FirstPhotoCell = styled(FirstBaseCell)`
@@ -111,13 +112,14 @@ export const ProductsTable = styled.div`
   width: 100%;
 `;
 
-export const ProductTr = styled.div`
+export const ProductTr = styled.div<{ isSelected: boolean}>`
 width: 100%;
 display: grid;
-grid-template-columns: 15% 10% 5% 5% 10% 10% 10% 10% 10% 10% 5%;
+grid-template-columns: 15% 10% 11% 7% 7% 10% 10% 11% 5% 5% 5%  5%;
 grid-template-areas: 
-    "id warehouse row shelf tier photo name amount price size checkbox"; 
+    "id  photo name amount price size group warehouse row shelf tier checkbox"; 
 border-bottom: 1px solid #E0E0E0;
+background:  ${({ isSelected}) => isSelected ? '#52778b1f' :'transparent'};
 `;
 
 

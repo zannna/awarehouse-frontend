@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 export const SelectContainer = styled.div`
   position: relative;
-  border: 1px solid #9D9CA1;
+  border: 1px solid #E0E0E0;
   padding: 0.2em;
   padding-left: 0.5em;
   padding-right: 0.5em;
   cursor: pointer;
   width: fit-content;
+  height: fit-content;
 `;
 
 export const SelectHeader = styled.div`
