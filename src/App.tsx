@@ -34,7 +34,11 @@ function App() {
       } />
       <Route path="/pw" element={<ProductsInWarehouse/>} />
       <Route path="/f" element={<FreePlace/>} />
-      <Route path="/g"element={<Group/>}/>
+      <Route path="/g"element={
+      <PrivateRoutes>
+        <Group/>
+      </PrivateRoutes>
+      }/>
       <Route path="/r"element={<Register/>}/>
       <Route path="/o"element={<Options/>}/>
       <Route
