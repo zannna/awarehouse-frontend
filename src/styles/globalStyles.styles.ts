@@ -8,8 +8,11 @@ interface BoxProps {
   marginRight?: string;
   marginLeft?: string;
   padding?: string;
+  paddingLeft?: string;
+  paddingRight?: string;
   cursor?: string;
   fontSize?: string;
+  border?: string;
 }
 export const Box = styled.div<BoxProps>`
   width: ${({ width }) => width ?? ''};
@@ -20,15 +23,20 @@ export const Box = styled.div<BoxProps>`
   margin-left: ${({ marginLeft}) => marginLeft ?? ''};
   margin-right: ${({ marginRight}) => marginRight ?? ''};
   padding: ${({ padding }) => padding ?? ''};
+  padding-left: ${({ paddingLeft }) => paddingLeft ?? ''};
+  padding-right: ${({ paddingRight }) => paddingRight ?? ''};
   cursor: ${({ cursor }) => cursor ?? ''};
   font-size: ${({ fontSize }) => fontSize ?? ''};
+  border: ${({ border }) => border ? '1px solid #cfcfcf' : 'none'};
 `;
+
 interface FlexProps {
     direction?: string;
     justify?: string;
     align?: string;
     gap?: string;
     wrap?: string;
+    pointer?: string;
 }
 
 export const Flex = styled(Box)<FlexProps>`
@@ -38,6 +46,7 @@ export const Flex = styled(Box)<FlexProps>`
   align-items: ${({ align }) => align ?? ''};
   gap :${({gap}) => gap ?? ''};
   flex-wrap: ${({ wrap }) => wrap ?? 'nowrap'};
+  cursor: ${({ pointer }) => pointer ?? ''};
 `;
 
 interface ImageProps{
@@ -50,6 +59,7 @@ interface ImageProps{
     marginLeft?: string;
     padding?: string;
     opacity?: string;
+    hoverOpacity?: string;
 
 }
 export const Image = styled.img<ImageProps>`
@@ -63,6 +73,9 @@ margin-right: ${({ marginRigth}) => marginRigth ?? '0.3em'};
 margin-left: ${({ marginLeft}) => marginLeft ?? ''};
 padding: ${({ padding }) => padding ?? ''};
 opacity :${({opacity}) => opacity ?? '0.5'};
+&:hover {
+  opacity: ${({ hoverOpacity, opacity }) => hoverOpacity ?? (opacity ? opacity : '0.5')};
+}
 `;
 
 interface GridItemProps {

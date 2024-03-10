@@ -220,3 +220,71 @@ export async function getProducts(
         return response.status;
         
       }
+
+      export interface RowWithProductsDto {
+        row: number;
+        shelves: ShelfWithProductsDto[];
+      }
+
+      export interface ShelfWithProductsDto {
+        id: string; 
+        number: number;
+        name: string;
+        hasFreeSpace: boolean;
+        tiers: TierWithProductsDto[];
+      }
+      
+      export interface TierWithProductsDto {
+        id: string;
+        number: number;
+        name: string;
+        occupiedVolume: number;
+        products: ProductInTierDto[];
+      }
+      
+      export interface ProductInTierDto {
+        id: string;
+        title: string;
+        amount: number;
+        image: string;
+      }
+      
+
+      export async function getProductsByTier(token: string | undefined, warehouseId: string, page = 0, size = 1): Promise<PageableResponse<RowWithProductsDto>> {
+        const response = await axiosCoreService.get(
+            `${PRODUCT_PATH}${WAREHOUSE_PATH}/${warehouseId}?page=${page}&size=${size}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+            }
+        );
+    
+        return response.data;
+      }
+
+      const FREE_PLACE_PATH = '/free-place';
+        const SHELF_PATH = '/shelf';
+        export interface FreePlaceDto {
+            height: number;
+            width: number;
+            length: number;
+            amount: number;
+            warehouseIds: string[];
+        }
+    export async function getFreePlaces(token: string | undefined, warehouseId: string, freePlaceDto : FreePlaceDto): Promise<PageableResponse<ShelfWithProductsDto[]>> {
+        const requestBody = {
+            freePlaceDto : freePlaceDto,
+        };
+        const response = await axiosCoreService.post(
+            `${WAREHOUSE_PATH}/${warehouseId}${SHELF_PATH}${FREE_PLACE_PATH}`,
+            requestBody,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+            }
+        );
+    
+        return response.data;
+      }

@@ -1,76 +1,87 @@
 
 import MainNavigation from '../../Header/MainNavigation';
-//   import ProductWarehouse from './ProductWarehouses/ProductWarehouses'
-import { Flex, Image, Checkbox } from '../../../styles/globalStyles.styles';
-import Selection from '../Selection/Selection';
-import Filter from '../Filter/Filter';
-import { Background, RowText, ShelvesText, ShelfContainer, ShelfTable, FirstLineText, ShelfText} from './ProductsInWarehouse.styles'
-import { useState, useEffect} from 'react';
+import { Flex, Image } from '../../../styles/globalStyles.styles';
+import { pageSize } from '../../../constants/Constants';
+import { Background, RowText, ShelvesText, ShelfContainer, ShelfTable, FirstLineText, FreePlaceButton } from './ProductsInWarehouse.styles'
+import { useState, useEffect } from 'react';
 import ShelfAccordion from './ProductInShelfAccordion/ProductsInShelfAccordion';
-import { Product } from '../../../types/types';
+import { getProductsByTier, ShelfWithProductsDto, TierWithProductsDto, RowWithProductsDto } from '../ProductsApi';
+import { PageableResponse } from '../../../types/types';
+import { useKeycloak } from '@react-keycloak/web';
+import { useCookies } from "react-cookie";
+import FreePlacePopup from './FreePlacePopup/FreePlacePopup';
+import Pagination from '../../Pagination/Pagination';
 function ProductsInWarehouse() {
-  const [showCreationBox, setShowCreationBox] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
-  const handleCheckboxChange = (product: Product) => {
-    console.log(product)
-    const isProductSelected = selectedProducts.some(selectedProduct => selectedProduct.id === product.id)
-    if (isProductSelected) {
-      setSelectedProducts(selectedProducts.filter(selectedProduct => selectedProduct.id !== product.id));
-    } else {
-      setSelectedProducts([...selectedProducts, product]);
-    }
-  };
+  const [products, setProducts] = useState<PageableResponse<RowWithProductsDto>>();
+  const { keycloak, initialized } = useKeycloak();
+  const [cookies] = useCookies(["warehouseId", "warehouseName"]);
+  const [showFreeProducts, setShowFreeProducts] = useState(false);
+  const [actualPage, setActualPage] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [visiblePageRange, setVisiblePageRange] = useState({ start: 0, end: 0 });
   useEffect(() => {
-    console.log(selectedProducts)
-  }, selectedProducts) 
+    getProductsByTier(keycloak.token, cookies.warehouseId, actualPage, pageSize)
+      .then(response => {
+        setProducts(response);
+        console.log(response.totalPages);
+        setPages(response.totalPages);
+        if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
+          let newStart = Math.max(0, actualPage - 2);
+          let newEnd = 4;
+          if (newEnd > response.totalPages - 1) {
+            newEnd = response.totalPages - 1;
+          }
+          if (actualPage > 5) {
+            newEnd = Math.min(response.totalPages - 1, actualPage + 2);
+          }
+          setVisiblePageRange({ start: newStart, end: newEnd });
+        }
+      });
+  }, [actualPage]);
+
   return (
-    <ShelfTable>
-      <Background>
-        <MainNavigation />
-        {/* <Filter /> */}
-        <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
-          {/* <Selection products={selectedProducts} ></Selection> */}
+    <Background>
+      <MainNavigation />
+
+      <FreePlaceButton onClick={() => { setShowFreeProducts(prev => !prev) }}>
+        <Image src={'/magnifying-glass.svg'} width="2em" opacity="60%"></Image>
+        FREE PLACE
+        {
+          showFreeProducts && (
+            <FreePlacePopup setShowFreeProducts={setShowFreeProducts} setProducts={setProducts} />
+          )
+        }
+      </FreePlaceButton>
+      <ShelfTable>
+        {products && products.content.map((row: RowWithProductsDto) => (
+          <div>
+            <RowText>Row {row.row}</RowText>
+            <ShelvesText>Shelves:</ShelvesText>
+            {row.shelves.map((shelf: ShelfWithProductsDto) => (
+              <div key={shelf.id}>
+                <ShelfContainer background="#EBEBEB">
+                  <FirstLineText>{`No.${shelf.number}`}</FirstLineText>
+                  <FirstLineText>{shelf.name}</FirstLineText>
+                  {shelf.hasFreeSpace !== null && (
+                    <Flex gap='0.5em' align='center'>
+                      <FirstLineText>Free space: </FirstLineText>
+                      <Image src={shelf.hasFreeSpace ? "/ok.svg" : "/cancel.svg"} alt="space" width="0.8em" opacity="60%"></Image>
+                    </Flex>
+                  )}
+                </ShelfContainer>
+                {shelf.tiers.map((tier: TierWithProductsDto) => (
+                  <ShelfAccordion key={tier.id} tier={tier} hasFreeSpace={shelf.hasFreeSpace} />
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+        <Flex width='100%' justify='flex-end' marginTop='2em'>
+          <Pagination actualPage={actualPage} setActualPage={setActualPage} startPage={visiblePageRange.start} endPage={visiblePageRange.end} setVisiblePageRange={setVisiblePageRange} pages={pages}></Pagination>
         </Flex>
-        <RowText>Row I</RowText>
-        <ShelvesText>shelves:</ShelvesText>
-        <ShelfTable>
-        <ShelfContainer background="#EBEBEB">
-          <FirstLineText>No.1</FirstLineText>
-          <FirstLineText>underwear</FirstLineText>
-          <FirstLineText>free place: <Image src="/ok.svg" alt="move" width="1em" opacity="100%"></Image></FirstLineText>
-          <Checkbox type="checkbox" place="end" gridArea='options' onChange={() => handleCheckboxChange({
-          id: '1',
-          name: 'Example Product',
-          amount: '500',
-          photo: 'example.jpg',
-          warehouse: 'warehouse',
-          row: 'row',
-          shelf: 'shelf',
-          tier: 'tier'
-        })}></Checkbox>
-        </ShelfContainer>
-        <ShelfAccordion selectedProducts={selectedProducts}  setSelectedProducts={ setSelectedProducts}></ShelfAccordion>
-        <ShelfContainer background="#b0bfc942">
-          <FirstLineText>No.1</FirstLineText>
-          <FirstLineText>underwear</FirstLineText>
-          <FirstLineText>free place: <Image src="/ok.svg" alt="move" width="1em" opacity="100%"></Image></FirstLineText>
-          <Checkbox type="checkbox" place="end" gridArea='options' onChange={() => handleCheckboxChange({
-          id: '1',
-          name: 'Example Product',
-          amount: '500',
-          photo: 'example.jpg',
-          warehouse: 'warehouse',
-          row: 'row',
-          shelf: 'shelf',
-          tier: 'tier'
-        })}></Checkbox>
-        </ShelfContainer>
-        <ShelfAccordion selectedProducts={selectedProducts}  setSelectedProducts={ setSelectedProducts}></ShelfAccordion>
-        <ShelfAccordion selectedProducts={selectedProducts}  setSelectedProducts={ setSelectedProducts}></ShelfAccordion>
-        </ShelfTable>
-      </Background>
-    </ShelfTable>
-  )
+      </ShelfTable>
+    </Background>
+  );
 }
 
 export default ProductsInWarehouse;

@@ -12,7 +12,7 @@ export const RowText = styled.div`
  font-size:1.2em;
 font-family: 'Palanquin Dark';
 font-style: normal;
-font-weight: 400;
+font-weight: 100;
  `;
 
 export const ShelvesText = styled.div`
@@ -27,9 +27,9 @@ export const ShelfTable = styled.div`
  margin-top:2em;
  `;
 
- interface ShelfProps {
+interface ShelfProps {
   background?: string;
-  }
+}
 
 export const ShelfContainer = styled.div<ShelfProps>`
  display: grid; 
@@ -42,18 +42,35 @@ export const ShelfContainer = styled.div<ShelfProps>`
   border: 1px solid #cfcfcf;
   border-bottom: 0.5px solid #cfcfcf;
  padding: 1em;
- background: ${({  background }) =>  background ?? ''};
+ background: ${({ background }) => background ?? ''};
  align-items: center; 
  `;
 
- export const FirstLineText = styled.div`
+export const FirstLineText = styled.div`
  color: #334F5E;
  font-weight: 500;
  font-style: normal;
  `;
- export const ShelfText = styled.div`
+export const ShelfText = styled.div`
  color: #929291;
  font-family: 'Palanquin Dark';
  font-weight: 400;
  `;
 
+export const FreePlaceButton = styled.button`
+ margin-top:2em;
+  height:3em;
+font-size:0.9em;
+display: flex;
+justify-content: center;
+align-items: center;
+position: relative;
+background: none;
+border: 1px solid #9D9CA1;
+padding:0.5em;
+padding-right:0.8em;
+color:#2D4561;
+&:hover {
+  background-color: none;
+}
+ `;

@@ -14,6 +14,7 @@ import { useKeycloak } from '@react-keycloak/web';
 import { getProducts } from './ProductsApi';
 import { useCookies } from "react-cookie";
 import Pagination from '../Pagination/Pagination';
+import { pageSize } from '../../constants/Constants';
 function Products() {
   const [showProductCreator, setShowProductCreator] = useState(false);
   const [selectedProductsMap, setSelectedProductsMap] = useState<Map<number, Product>>(new Map());
@@ -21,7 +22,6 @@ function Products() {
   const [cookies] = useCookies(["warehouseId", "warehouseName"]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedWarehouses, setSelectedWarehouses] = useState<Warehouse[]>([{ id: cookies.warehouseId, name: cookies.warehouseName }]);
-  const pageSize = 2;
   const [actualPage, setActualPage] = useState(0);
   const [pages, setPages] = useState(0);
   const [visiblePageRange, setVisiblePageRange] = useState({ start: 0, end: 0 });
@@ -54,6 +54,9 @@ function Products() {
         if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
           let newStart = Math.max(0, actualPage - 2);
           let newEnd = 4;
+          if(newEnd>products.totalPages-1){
+            newEnd=products.totalPages-1;
+          }
           if (actualPage > 2)
             newEnd = Math.min(products.totalPages - 1, actualPage + 2);
           setVisiblePageRange({ start: newStart, end: newEnd });
