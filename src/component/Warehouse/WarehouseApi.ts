@@ -5,7 +5,7 @@ export interface Dimensions{
     length: number;
 }
 
-export interface Shelf {
+export interface ShelfDto {
     id: string;
     number: number;
     name: string;
@@ -34,6 +34,7 @@ export interface Shelf {
   }
   
   export interface TierCreation{
+    id?: string;
      number:  number;
      name :string;
      size :boolean;
@@ -43,7 +44,7 @@ export interface Shelf {
   const WAREHOUSE_PATH = '/warehouse';
   const SHELF_PATH = '/shelf';
 
-export async function createShelf(token :string|undefined,warehouseId : string ,data: ShelfCreation) : Promise<Shelf>{
+export async function createShelf(token :string|undefined,warehouseId : string ,data: ShelfCreation) : Promise<ShelfDto>{
     const response = await axiosCoreService.post(
         `${WAREHOUSE_PATH}/${warehouseId}${SHELF_PATH}`,
         data,
@@ -57,7 +58,7 @@ export async function createShelf(token :string|undefined,warehouseId : string ,
     return response.data;
 }
 
-export async function getShelves(token :string|undefined, warehouseId :string) : Promise<Shelf[]>{
+export async function getShelves(token :string|undefined, warehouseId :string) : Promise<ShelfDto[]>{
     const response = await axiosCoreService.get(`${WAREHOUSE_PATH}/${warehouseId}${SHELF_PATH}`,{
         headers: {
             'Authorization': `Bearer ${token}`
@@ -93,8 +94,8 @@ export async function getRowsNumber(token :string|undefined, warehouseId :string
 
 export async function addRow(token :string|undefined, warehouseId :string) : Promise<number>{
     const response = await axiosCoreService.put(
-        `${WAREHOUSE_PATH}/${warehouseId}/row?rowsNumber=1`, // Przekazanie rowsNumber jako parametru zapytania
-        {}, // Puste ciało żądania, jeśli nie jest wymagane
+        `${WAREHOUSE_PATH}/${warehouseId}/row?rowsNumber=1`, 
+        {},
         {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -102,4 +103,18 @@ export async function addRow(token :string|undefined, warehouseId :string) : Pro
         }
     );
     return response.request.status;
+}
+
+export async function updateShelf(token :string|undefined,warehouseId : string ,data: ShelfCreation) : Promise<ShelfDto>{
+    const response = await axiosCoreService.put(
+        `${WAREHOUSE_PATH}/${warehouseId}${SHELF_PATH}`,
+        data,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+              }
+        }
+    );
+
+    return response.data;
 }

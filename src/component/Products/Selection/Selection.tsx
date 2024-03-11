@@ -70,6 +70,11 @@ function Selection({ selectedProducts,
             </SmallText>
             {showMoveModal&& !showNoSelectionWarning  && <Move products={selectedProducts} setShowMoveModal={setShowMoveModal}/>}
             <SmallLine />
+            <Image src="/pen.svg" alt="modify" width="1.5em" height="1.5em"></Image>
+            <SmallText onClick={()=>handleShowMoveModal()} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+              modify
+            </SmallText>
+            <SmallLine />
             <Image src="/bin.svg" alt="remove" width="1.5em"></Image>
             <RemoveText onClick={()=>{handleRemoveProducts()}}>remove</RemoveText>
             <Line />

@@ -26,3 +26,10 @@ grid-template-areas:
  padding: 1em;
  border-bottom: 1px solid #cfcfcf;
 `;
+
+export const TierText = styled.div`
+font-family: 'Play';
+font-weight: 400;
+COLOR:  #6A6A6A;
+text-align:center;
+`;

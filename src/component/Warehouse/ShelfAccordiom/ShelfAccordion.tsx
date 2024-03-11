@@ -1,30 +1,42 @@
     import { ShelfRow, ShelfText, RowContainer, BlueMarkText } from "./ShelfAccordion.styles";
     import { Flex, Image, Text } from "../../../styles/globalStyles.styles";
     import { ShelfTableHeaderText } from '../Warehouse.styles';
-    import { useState, useRef, } from "react";
-    import { Shelf } from "../WarehouseApi";
+    import { useState, useRef, useEffect, } from "react";
+    import { ShelfDto } from "../WarehouseApi";
     import { useCookies } from "react-cookie";
     import { useKeycloak } from '@react-keycloak/web';
     import ShelfCreator from "../ShelfCreator/ShelfCreator";
-    import Tiers from "./Tier/Tiers";
-    function ShelfAccordion({ shelves, row, updateShelfStateAfterTierRemoval, updateShelvesAfterShelfRemoval }: {
-        shelves: Shelf[], row: number,
+    import Shelf from "./Shelf/Shelf";
+    function ShelfAccordion({ shelves, setShelves, row, updateShelfStateAfterTierRemoval, updateShelvesAfterShelfRemoval }: {
+        shelves: ShelfDto[],
+        setShelves: (shelves: ShelfDto[]) => void,
+         row: number,
         updateShelfStateAfterTierRemoval: (shelfId: string, tierId: string) => void, updateShelvesAfterShelfRemoval: (shelfId: string) => void
     }) {
         const [showTiers, setShowTiers] = useState(false);
         const [cookies, setCookie] = useCookies(["warehouseId"]);
         const { keycloak, initialized } = useKeycloak();
         const [newShelf, setNewShelf] = useState(false);
-        const [modifyShelf, setModifyShelf] = useState<Shelf | null>(null);
+        const [modifyShelf, setModifyShelf] = useState<ShelfDto | null>(null);
         const myRef = useRef<null | HTMLDivElement>(null);
 
-
+        useEffect(() => {
+            if (modifyShelf) {
+                const updatedShelves = shelves.map(shelve => {
+                  if (shelve.id === modifyShelf.id) {
+                    return { ...shelve, ...modifyShelf };
+                  }
+                  return shelve;
+                });
+                setShelves(updatedShelves);
+            }
+        },[modifyShelf]);
         function addNewShelf() {
             setNewShelf(true);
             myRef.current?.scrollIntoView({ behavior: 'smooth', block: "center" });
         }
 
-        function handleModifyShelf(shelf: Shelf) {
+        function handleModifyShelf(shelf: ShelfDto) {
             console.log("modify shelf");
             setModifyShelf(shelf);
             setNewShelf(true);
@@ -51,9 +63,9 @@
             </ShelfRow>
             {shelves.map((shelf) => (
                 <div>
-                    <Tiers shelf={shelf}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval} handleModifyShelf={handleModifyShelf}
+                    <Shelf shelf={shelf}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval} handleModifyShelf={handleModifyShelf}
                     updateShelvesAfterShelfRemoval ={updateShelvesAfterShelfRemoval }
-                    ></Tiers>
+                    ></Shelf>
                 </div>
             ))}
             <div ref={myRef}>

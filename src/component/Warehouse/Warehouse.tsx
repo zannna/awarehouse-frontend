@@ -5,12 +5,12 @@ import  ShelfAccordion from './ShelfAccordiom/ShelfAccordion'
 import { useState, useRef, useEffect } from 'react';
 import ShelfCreator from './ShelfCreator/ShelfCreator';
 import { useCookies } from "react-cookie";
-import { getShelves, Shelf, getRowsNumber, addRow } from './WarehouseApi';
+import { getShelves, ShelfDto, getRowsNumber, addRow } from './WarehouseApi';
 import { useKeycloak } from '@react-keycloak/web';
 function Warehouse() {
     // const [newShelf, setNewShelf] = useState(false);
     const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
-    const [shelves, setShelves] = useState<Shelf[]>([]);
+    const [shelves, setShelves] = useState<ShelfDto[]>([]);
     const { keycloak, initialized } = useKeycloak();
     const [rowsNumber, setRowsNumber] = useState(5);
     useEffect(() => {
@@ -64,7 +64,7 @@ function Warehouse() {
             </Flex>
             <WarehouseTable>
             {Array.from({ length: rowsNumber }, (_, index) => (
-               <ShelfAccordion key={index} shelves={shelves.filter(shelf => shelf.row === index+1)} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
+               <ShelfAccordion key={index} setShelves={setShelves} shelves={shelves.filter(shelf => shelf.row === index+1)} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
                updateShelvesAfterShelfRemoval={updateShelvesAfterShelfRemoval}
                ></ShelfAccordion>
                ))}

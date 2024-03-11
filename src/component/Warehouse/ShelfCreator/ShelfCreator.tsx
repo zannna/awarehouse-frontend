@@ -4,15 +4,15 @@ import Selector from '../../Selector/Selector';
 import {NameInput, Input, ShelfCreationRow, CreateShelfContainer} from './ShelfCreator.styles'
 import { BlueMarkText,TierRow, ShelfTableHeaderText } from '../Warehouse.styles';
 import { unitMap } from '../../../constants/MapConstants';
-import {Dimensions, ShelfCreation, TierCreation, createShelf, Shelf} from '../WarehouseApi'
+import {Dimensions, ShelfCreation, TierCreation, createShelf, ShelfDto, updateShelf, Tier} from '../WarehouseApi'
 import {metreMap, metreConverter } from '../../../constants/MapConstants'
 import { useCookies } from "react-cookie";
 import { useKeycloak } from '@react-keycloak/web';
 interface ShelfCreatorProps {
     setNewShelf: (data: any) => void;
-    addShelf: (shelf: Shelf) => void;
+    addShelf: (shelf: ShelfDto) => void;
     row: number;
-    editShelf?: Shelf;
+    editShelf?: ShelfDto;
     setEditShelf?: (data: any) => void;
   }
   
@@ -33,8 +33,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
 
     useEffect(() => {
       if (props.editShelf) {
-        console.log(props.editShelf.tiers.length);
-        console.log("ajasddjsafda");
+        console.log(props.editShelf);
           setShelfNumber(props.editShelf.number);
           setShelfName(props.editShelf.name);
           setShelfSize(props.editShelf.size);
@@ -44,16 +43,17 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
           setSameSizeOfTiers(props.editShelf.sameSizeTiers);
           setNumberOfTiers(props.editShelf.tiers.length);
           setSelectedUnit(["0", unitMap.get(props.editShelf.dimensions.unit) || '']);
-          setTiers(props.editShelf.tiers);
+          setTiers( props.editShelf.tiers);
           setShowTiers(true);
         }
   }, [props.editShelf]);
 
   useEffect(() => {
-    console.log(selectedUnit);
-  }, [selectedUnit]);
+    console.log(tiers);
+  }, [tiers]);
 
   useEffect(() => {
+    if (!props.editShelf){
       setTiers(prevTiers => {
           const newTiers = [...prevTiers];
           for (let i = prevTiers.length; i < numberOfTiers; i++) {
@@ -64,6 +64,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
           }
           return newTiers;
       });
+    }
   }, [numberOfTiers]);
   
     const updateTiers = (index: number,  detailType:  Exclude<keyof TierCreation, 'dimensions'>, value: string | number | boolean ) => {
@@ -75,6 +76,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
           return updatedTiers;
         });
       }
+      
 
       const updateTierDimensions = (elementId: number, dimensionType: keyof Dimensions, value: string) => {
         const dimensionValue = parseFloat(value); 
@@ -105,42 +107,71 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
          // }
       }
     async function sendShelfCreationRequest(){
-      const shelfData = {
-        number: shelfNumber,
-        name: shelfName,
-        size: shelfSize,
-        unit: selectedUnit[1],
-        sameSizeTiers: sameSizeOfTiers,
-        row: props.row,
-        dimensions: {
-            height: shelfHeight,
-            length: shelfLength,
-            width: shelfWidth,
-            unit: metreConverter(selectedUnit[1]),
-        },
-        tiers: tiers.map(tier => ({
-          number: tier.number, 
-          name: tier.name, 
-          size: tier.size,
+      if (props.editShelf) {
+        const shelfData = {
+          id: props.editShelf.id,
+          number: shelfNumber,
+          name: shelfName,
+          size: shelfSize,
+          unit: selectedUnit[1],
+          sameSizeTiers: sameSizeOfTiers,
+          row: props.row,
+          dimensions: {
+              height: shelfHeight,
+              length: shelfLength,
+              width: shelfWidth,
+              unit: metreConverter(selectedUnit[1] ? selectedUnit[1] : 'm'),
+          },
+          tiers: tiers.map(tier => ({
+            id: tier.id,
+            number: tier.number, 
+            name: tier.name, 
+            size: tier.size,
+            dimensions: {
+                height: shelfHeight,
+                length: shelfLength,
+                width: shelfWidth,
+                unit: metreConverter(selectedUnit[1] ? selectedUnit[1] : 'm'),
+            }
+          }))
+        }
+        const updatedShelf = await updateShelf(keycloak.token, cookies['warehouseId'], shelfData);
+        props.setEditShelf(updatedShelf);
+        props.setNewShelf(false);
+
+      }
+      else{
+        const shelfData = {
+          number: shelfNumber,
+          name: shelfName,
+          size: shelfSize,
+          unit: selectedUnit[1],
+          sameSizeTiers: sameSizeOfTiers,
+          row: props.row,
           dimensions: {
               height: shelfHeight,
               length: shelfLength,
               width: shelfWidth,
               unit: metreConverter(selectedUnit[1]),
-          }
-        }))
+          },
+          tiers: tiers.map(tier => ({
+            number: tier.number, 
+            name: tier.name, 
+            size: tier.size,
+            dimensions: {
+                height: shelfHeight,
+                length: shelfLength,
+                width: shelfWidth,
+                unit: metreConverter(selectedUnit[1]),
+            }
+          }))
+        }
+        console.log(shelfData)
+        const fetchedProduct= await createShelf(keycloak.token, cookies['warehouseId'], shelfData);
+        console.log(fetchedProduct);
+        props.setNewShelf(false);
+        props.addShelf(fetchedProduct);
       }
-     console.log(shelfData)
-     const fetchedProduct= await createShelf(keycloak.token, cookies['warehouseId'], shelfData);
-     console.log(fetchedProduct);
-     props.setNewShelf(false);
-     props.addShelf(fetchedProduct);
-      // const groupsMap = new Map<string, string>();
-      // fetchedGroups.forEach(group => {
-      //   groupsMap.set(group.id, group.name);
-      // });
-      // setGroups(groupsMap);
-
     }
 
     const removeTier = (indexToRemove: number) => {
