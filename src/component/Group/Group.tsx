@@ -23,7 +23,7 @@ function Group() {
     };
     useEffect(() => {
         getGroupsWithWarehouses(keycloak.token).then((fetchedGroups) => {
-            setGroupsWithWarehouses(fetchedGroups);
+            setGroupsWithWarehouses(fetchedGroups.groupWithWarehouses);
         });
         getWarehouses(keycloak.token).then((fetchedWarehouses) => {
             setWarehouses(fetchedWarehouses);

@@ -29,11 +29,16 @@ export async function getWarehouses(token :string|undefined) : Promise<Warehouse
     return response.data;
 }
 
+export interface GroupsAndWarehouses{
+    groupWithWarehouses: GroupWithWarehouses[];
+    warehousesWithoutGroup: Warehouse[];
+  }
+
 export  interface GroupWithWarehouses {
     group: Group;
     warehouses: Warehouse[];
   }
-  export async function getGroupsWithWarehouses(token :string|undefined) : Promise<GroupWithWarehouses[]>{
+  export async function getGroupsWithWarehouses(token :string|undefined) : Promise<GroupsAndWarehouses>{
     const response = await axiosCoreService.get(
         `${WAREHOUSE_PATH}${GROUP_PATH}`,
         {

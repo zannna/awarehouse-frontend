@@ -37,3 +37,13 @@ export interface PageableResponse<T> {
     numberOfElements: number;
     empty: boolean;
   }
+
+  export interface Warehouse{
+    id: string;
+    name: string;
+}
+
+export interface GroupData {
+  id: string;
+  name: string;
+}

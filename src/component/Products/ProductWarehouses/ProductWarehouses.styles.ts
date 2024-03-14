@@ -53,16 +53,19 @@ export const Checkbox = styled.input`
   background-color:green;
 `;
 
-export const GroupText = styled.div`
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-family: 'Play';
-    font-weight: 400;
-    color: rgba(52, 51, 51, 0.8);
-    font-size: 1em;
-    margin-top:1em;
-    margin-bottom:1em;
+export const PopupText = styled.div`
+font-family: 'Play';
+font-weight: 400;
+color: rgba(52, 51, 51, 0.8);
+font-size: 1em;
+margin-top:1em;
+margin-bottom:1em;
+display:flex;
+justify-content:space-between;
+align-items:center;
+`;
+
+export const GroupText = styled(PopupText)`
     text-decoration: underline;
     text-underline-offset: 6px;
 `;

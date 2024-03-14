@@ -8,7 +8,6 @@ import { useCookies } from "react-cookie";
 import { getShelves, ShelfDto, getRowsNumber, addRow } from './WarehouseApi';
 import { useKeycloak } from '@react-keycloak/web';
 function Warehouse() {
-    // const [newShelf, setNewShelf] = useState(false);
     const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
     const [shelves, setShelves] = useState<ShelfDto[]>([]);
     const { keycloak, initialized } = useKeycloak();

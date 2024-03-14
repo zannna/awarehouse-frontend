@@ -2,10 +2,11 @@ import { Text, Flex, Image, GridItem } from '../../../styles/globalStyles.styles
 import Selector from '../../Selector/Selector';
 import { CreationBox, CreationText, CreationInputContainer, CreationInput, ProductGrid, ShortCreationInput, CancelButton, CreateButton } from './ProductCreator.styles';
 import { useEffect, useState, useRef } from 'react';
-import { Warehouse, getAdminGroups, getWarehouses, createProduct, ProductCreation, Product } from '../ProductsApi';
+import { Warehouse, getAdminGroups, getWarehouses, createProduct, ProductCreation, Product, updateProduct } from '../ProductsApi';
 import { currencyMap } from '../../../constants/MapConstants';
 import { useKeycloak } from '@react-keycloak/web';
-function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductCreator: (show: boolean) => void, addProduct: (product: Product) => void }) {
+function ProductCreator({ setShowProductCreator, products, setProducts, editProduct, setEditProduct }:
+  { setShowProductCreator: (show: boolean) => void, products: Product[], setProducts: (product: Product[]) => void, setEditProduct: (product: Product | null) => void, editProduct: Product | null }) {
   const [groups, setGroups] = useState<Map<string, string>>(new Map());
   const [selectedGroup, setSelectedGroup] = useState<string[] | null>(null);
   const [warehousesElements, setWarehousesElements] = useState<number[]>([]);
@@ -17,6 +18,55 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
   const { keycloak, initialized } = useKeycloak();
   const [file, setFile] = useState<File>();
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [productData, setProductData] = useState<ProductCreation>({
+    title: '',
+    amountGroup: 0,
+    groupId: '',
+    price: { amount: 0, currency: 'PLN' },
+    dimensions: { width: 0, height: 0, length: 0 },
+    productWarehouses: [],
+    image: ''
+  });
+useEffect(() => {
+  console.log(editProduct);
+},[editProduct]);
+  useEffect(() => {
+    if (editProduct) {
+      setProductData({
+        id: editProduct?.id || '',
+        title: editProduct?.title || '',
+        amountGroup: editProduct?.amountGroup || 0,
+        price: {
+          amount: editProduct?.price?.amount || 0,
+          currency: editProduct?.price?.currency || '',
+        },
+        groupId: '',
+        dimensions: {
+          width: editProduct?.dimensions?.width || 0,
+          height: editProduct?.dimensions?.height || 0,
+          length: editProduct?.dimensions?.length || 0,
+        },
+        productWarehouses: [],
+        image: editProduct?.image || ''
+      });
+      if (editProduct.productWarehouses && editProduct.productWarehouses.length > 0) {
+        const firstWarehouse = editProduct.productWarehouses[0];
+        setProductWarehouses(new Map([[0, {
+          warehouseId: firstWarehouse.productWarehouseId || '',
+          productWarehouseId: firstWarehouse.productWarehouseId || '',
+          warehouseName: firstWarehouse.warehouseName || '',
+          shelfNumber: firstWarehouse.shelfNumber || 0,
+          tierNumber: firstWarehouse.tierNumber || 0,
+          amount: firstWarehouse.amount || 0
+        }]]));
+        setWarehousesElements([0]);
+      }
+
+      if (editProduct.image) {
+        setImagePreviewUrl(`data:image/jpeg;base64,${editProduct.image}`);
+      }
+    }
+  }, [editProduct]);
 
   const addWarehouseElement = () => {
     setWarehousesElements(warehousesElements => [...warehousesElements, lastWarehouseId]);
@@ -56,15 +106,6 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
     fetchGroups();
   }, []);
 
-  const [productData, setProductData] = useState<ProductCreation>({
-    title: '',
-    amountGroup: 0,
-    groupId: '',
-    price: { amount: 0, currency: 'PLN' },
-    dimensions: { width: 0, height: 0, length: 0 },
-    productWarehouses: []
-  });
-
   const handleCretionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     console.log(name, value);
@@ -86,7 +127,7 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
       }
     }))
   };
-  
+
   const handleDimensionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const dimensionValue = parseFloat(value);
@@ -108,9 +149,10 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
     }
   };
 
-  useEffect(() => {
-    console.log(productWarehouses);
-  }, [productWarehouses]);
+  const addProduct = (product: Product) => {
+    setProducts([...products, product]);
+  };
+
 
   const updateProductWarehouses = (elementId: number, detailType: string, value: string | number) => {
     setProductWarehouses(prevDetails => {
@@ -138,13 +180,33 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
       return wh.warehouseId || wh.shelfNumber || wh.tierNumber || wh.amount;
     });
     console.log(groupId)
-    const fetchedProduct = await createProduct(keycloak.token, file, {
-      ...productData,
-      groupId: groupId,
-      productWarehouses: warehouses
-    });
-    addProduct(fetchedProduct);
-    console.log(fetchedProduct);
+    if (editProduct) {
+      updateProduct(keycloak.token, file, {
+        ...productData,
+        group : {id: groupId, name: ''},
+        productWarehouses: warehouses
+      }).then(fetchedProduct => {
+        const updatedProducts = products.map(product => {
+          if (product?.productWarehouses && fetchedProduct?.productWarehouses &&
+            product?.productWarehouses[0]?.productWarehouseId == fetchedProduct?.productWarehouses[0]?.productWarehouseId) {
+            return { ...product, ...fetchedProduct };
+          }
+          return product;
+        });
+        setProducts(updatedProducts);
+        console.log(fetchedProduct);
+      });
+    }
+
+    else {
+      const fetchedProduct = await createProduct(keycloak.token, file, {
+        ...productData,
+        groupId: groupId,
+        productWarehouses: warehouses
+      });
+      addProduct(fetchedProduct);
+      console.log(fetchedProduct);
+    }
     setShowProductCreator(false)
   }
 
@@ -171,23 +233,23 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
           <ProductGrid>
             <Flex gap="1em">
               name
-              <CreationInput name='title' onChange={event => handleCretionChange(event)}></CreationInput>
+              <CreationInput value={productData.title} name='title' onChange={event => handleCretionChange(event)}></CreationInput>
             </Flex>
             <Flex gap="1em">
               price
-              <ShortCreationInput onChange={event => handlePriceChange(event)}></ShortCreationInput>
+              <ShortCreationInput value={productData.price.amount} onChange={event => handlePriceChange(event)}></ShortCreationInput>
               <Selector items={currencyMap} selected={selectedCurrency} setSelected={setSelectedCurrency} ></Selector>
             </Flex>
             <Flex gap="1em">
               amount
-              <ShortCreationInput name='amountGroup' onChange={event => handleCretionChange(event)}></ShortCreationInput>
+              <ShortCreationInput value={productData.amountGroup} name='amountGroup' onChange={event => handleCretionChange(event)}></ShortCreationInput>
             </Flex>
             <Flex gap="1em"> width
-              <CreationInput name='width' onChange={event => handleDimensionChange(event)}></CreationInput></Flex>
+              <CreationInput name='width' value={productData.dimensions.width} onChange={event => handleDimensionChange(event)}></CreationInput></Flex>
             <Flex gap="1em"> height
-              <ShortCreationInput name='height' onChange={event => handleDimensionChange(event)}></ShortCreationInput></Flex>
+              <ShortCreationInput name='height' value={productData.dimensions.height} onChange={event => handleDimensionChange(event)}></ShortCreationInput></Flex>
             <Flex gap="1em"> length
-              <ShortCreationInput name='length' onChange={event => handleDimensionChange(event)}></ShortCreationInput></Flex>
+              <ShortCreationInput name='length' value={productData.dimensions.length} onChange={event => handleDimensionChange(event)}></ShortCreationInput></Flex>
             <GridItem gridArea="groups">
               <Flex gap='1em'>
                 group
@@ -207,15 +269,16 @@ function ProductCreator({ setShowProductCreator, addProduct }: { setShowProductC
               />
               {imagePreviewUrl && <Image src={imagePreviewUrl} alt="Preview" marginTop="2em" width="100px" height="100px" opacity='100%' />}
             </GridItem>
+             {editProduct == null ??
             <GridItem gridArea="warehouse">
               <Flex gap='1em'>
                 <Text color='#344351' weight='500'>warehouse</Text>
-                <Image src="/square-add.svg" alt="down" width="1.1em" opacity='70%' onClick={() => { addWarehouseElement() }} />
+                  <Image src="/square-add.svg" alt="down" width="1.1em" opacity='70%' onClick={() => { addWarehouseElement() }} />
               </Flex>
             </GridItem>
-
+  }
           </ProductGrid>
-          {warehousesElements.map(elementId => (
+          {editProduct == null ?? warehousesElements.map(elementId => (
             <Flex width='100%' align='center' justify='space-between' key={elementId}>
               <Flex gap="1em"> name
                 <Selector items={warehouses} selected={null} setSelected={(selectedItem: string[]) => { addWarehouse(elementId, selectedItem) }} ></Selector>

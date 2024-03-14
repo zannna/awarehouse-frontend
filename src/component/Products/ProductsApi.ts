@@ -30,14 +30,17 @@ export interface Group{
     name :string;
 }
 export interface ProductCreation{
+    id?: string;
     title: string;
     amountGroup: number;
     groupId: string;
     price :Price;
     dimensions: Dimensions;
     productWarehouses:  ProductWarehouseCreationDto[];   
+    image?: string;
 }
 export interface ProductWarehouseCreationDto{
+    productWarehouseId?: string;
     warehouseId?: string;
     warehouseName? :string;
     amount?: number;
@@ -47,7 +50,7 @@ export interface ProductWarehouseCreationDto{
 export interface Product{
     id? :string;
     title?: string;
-    amount?: number;
+    amountGroup?: number;
     image? :string;
     group?: Group;
     price? :Price;
@@ -74,11 +77,6 @@ export async function createProduct(token :string|undefined, file :File|undefine
 
     return response.data;
 }
-
-// export async function getProduct() : Promise<Product[]>{
-//     const response = await axiosCoreService.get(`${PRODUCT_PATH}`);
-//     return response.data;
-// }
 
 export interface GroupData {
     id: string;
@@ -124,7 +122,6 @@ export async function getProducts(
     warehouseIds: string[],
     sortConditions: { [key: string]: string } = {},
     searchElements: { [key: string]: string } = {},
-    groupIds: string[],
     page = 0,
     size = 1
   ): Promise<PageableResponse<Product>> {
@@ -133,7 +130,6 @@ export async function getProducts(
           warehouseIds: warehouseIds,
           sortConditions: sortConditions,
           searchConditions: searchElements,
-          groupIds: groupIds,
           page,
           size
       };
@@ -146,6 +142,33 @@ export async function getProducts(
   console.log(response);
       return response.data;
   }
+  const BASE_GROUP_PATH = '/group';
+  export async function getProductsByGroup(
+    token: string | undefined,
+    sortConditions: { [key: string]: string } = {},
+    searchElements: { [key: string]: string } = {},
+    groupIds: string[],
+    page = 0,
+    size = 1
+  ): Promise<PageableResponse<Product>> {
+
+      const requestBody = {
+          sortConditions: sortConditions,
+          searchConditions: searchElements,
+          groupIds: groupIds,
+          page,
+          size
+      };
+  
+      const response = await axiosCoreService.post(`${PRODUCT_PATH}${SEARCH_PATH}${BASE_GROUP_PATH}?page=${page}&size=${size}`, requestBody, {
+          headers: {
+              'Authorization': `Bearer ${token}`
+          }
+      });
+
+      return response.data;
+    }
+  
 
   const MOVE_PATH = '/move';
 
@@ -188,7 +211,13 @@ export async function getProducts(
         group: GroupData;
         warehouses: Warehouse[];
       }
-      export async function getGroupsWithWarehouses(token :string|undefined) : Promise<GroupWithWarehouses[]>{
+
+      export interface GroupsAndWarehouses{
+        groupWithWarehouses: GroupWithWarehouses[];
+        warehousesWithoutGroup: Warehouse[];
+      }
+
+      export async function getGroupsAndWarehouses(token :string|undefined) : Promise<GroupsAndWarehouses>{
         const response = await axiosCoreService.get(
             `${GROUP_PATH}`,
             {
@@ -272,6 +301,7 @@ export async function getProducts(
             amount: number;
             warehouseIds: string[];
         }
+
     export async function getFreePlaces(token: string | undefined, warehouseId: string, freePlaceDto : FreePlaceDto): Promise<PageableResponse<ShelfWithProductsDto[]>> {
         const requestBody = {
             freePlaceDto : freePlaceDto,
@@ -287,4 +317,32 @@ export async function getProducts(
         );
     
         return response.data;
+      }
+
+      export async function  updateProduct(token :string|undefined, file :File|undefined, data:  Product) : Promise<Product>{
+        const url = `${CORE_SERVICE}${API_VERSION_URI}${PRODUCT_PATH}/`;
+        const formData = new FormData();
+        console.log( data)
+
+        if (file) {
+          formData.append('file', file);
+        }
+      
+        formData.append('product', new Blob([JSON.stringify(data)], { type: "application/json" }));
+      
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log(response);
+        return await response.json(); 
+
+
       }

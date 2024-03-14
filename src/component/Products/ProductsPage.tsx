@@ -11,7 +11,7 @@ import Filter from './Filter/Filter';
 import { useState, useEffect } from 'react';
 import { Product, Warehouse, Group } from './ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
-import { getProducts } from './ProductsApi';
+import { getProducts, getProductsByGroup } from './ProductsApi';
 import { useCookies } from "react-cookie";
 import Pagination from '../Pagination/Pagination';
 import { pageSize } from '../../constants/Constants';
@@ -28,6 +28,7 @@ function Products() {
   const [searchConditions, setSearchConditions] = useState<{ [key: string]: string }>({});
   const [sortConditions, setSortConditions] = useState({});
   const [selectedGroup, setSelectedGroup] = useState<Group[]>([]);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
 
   const updateSearchConditions = (key: string, value: string) => {
     setSearchConditions(prevConditions => {
@@ -46,19 +47,24 @@ function Products() {
   useEffect(() => {
     if (selectedWarehouses && selectedWarehouses.length > 0) {
       const warehouseIds = selectedWarehouses.map(warehouse => warehouse.id);
-      const groupIds = selectedGroup.map(group => group.id);
-      getProducts(keycloak.token, warehouseIds, sortConditions, searchConditions, groupIds, actualPage, pageSize).then((products) => {
-        console.log(products);
+      setSelectedGroup([]);
+      getProducts(keycloak.token, warehouseIds, sortConditions, searchConditions, actualPage, pageSize).then((products) => {
         setProducts(products.content);
-        setPages(products.totalPages);
+        console.log(products.totalPages);
+        setPages(products.totalPages);  
+        if(visiblePageRange.end > products.totalPages-1)
+          {setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages-1 });
+      }
         if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
           let newStart = Math.max(0, actualPage - 2);
           let newEnd = 4;
           if(newEnd>products.totalPages-1){
             newEnd=products.totalPages-1;
           }
-          if (actualPage > 2)
+          if (actualPage > 2){
             newEnd = Math.min(products.totalPages - 1, actualPage + 2);
+          }
+          console.log(newStart, newEnd);
           setVisiblePageRange({ start: newStart, end: newEnd });
         }
       }).catch(error => {
@@ -66,8 +72,34 @@ function Products() {
         setProducts([]);
       });
     }
-  }, [selectedWarehouses, actualPage, searchConditions, sortConditions, selectedGroup]);
+  }, [selectedWarehouses, actualPage, searchConditions, sortConditions]);
 
+  useEffect(() => {
+    const groupIds = selectedGroup.map(group => group.id);
+    if(groupIds.length === 0) return;
+    setSelectedWarehouses([]);
+    getProductsByGroup(keycloak.token, sortConditions, searchConditions, groupIds, actualPage, pageSize).then((products) => {
+      setProducts(products.content);
+      setPages(products.totalPages);
+      if(visiblePageRange.end > products.totalPages-1)
+      {setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages-1 });
+  }
+      if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
+        let newStart = Math.max(0, actualPage - 2);
+        let newEnd = 4;
+        if(newEnd>products.totalPages-1){
+          newEnd=products.totalPages-1;
+        }
+        if (actualPage > 2)
+          newEnd = Math.min(products.totalPages - 1, actualPage + 2);
+        setVisiblePageRange({ start: newStart, end: newEnd });
+      }
+    }).catch(error => {
+      console.error("Failed to fetch products:", error);
+      setProducts([]);
+    });
+
+  },[selectedGroup,  actualPage]);
 
   const handleCheckboxChange = (uniqueId :number, product :Product, isChecked :boolean) => {
     setSelectedProductsMap(prevMap => {
@@ -83,16 +115,14 @@ function Products() {
     });
   };
 
-  const addSelectedProduct = (product: Product) => {
-    setProducts([...products, product]);
-  };
-
-
+useEffect(() => {
+setShowProductCreator(!!editProduct);
+},[editProduct]);
 
   return (<Background>
     <MainNavigation />
     <ProductWarehouse selectedWarehouses={selectedWarehouses} setSelectedWarehouses={setSelectedWarehouses}
-      selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+      selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} setActualPage={setActualPage}/>
     <Filter updateSearch={searchConditions} updateSearchConditions={updateSearchConditions} sortConditions={sortConditions} setSortConditions={setSortConditions} />
     <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
       <Flex align="center">
@@ -108,7 +138,8 @@ function Products() {
         <Image src="/website.svg" alt="website" width="1em"></Image>
         <SmallText> from site</SmallText>
       </Flex>
-      <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products} setProducts={setProducts}></Selection>
+      <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products} 
+      setProducts={setProducts} setEditProduct={setEditProduct}  setShowProductCreator={setShowProductCreator} ></Selection>
     </Flex>
     <ProductsTable>
       <ProductTr isSelected={false}>
@@ -134,7 +165,7 @@ function Products() {
             </Flex>
           </PhotoCell>
           <NameCell>{product.title}</NameCell>
-          <AmountCell>{product.productWarehouses?.at(0) ? product.productWarehouses?.at(0)?.amount : product.amount}</AmountCell>
+          <AmountCell>{product.productWarehouses?.at(0) ? product.productWarehouses?.at(0)?.amount : product.amountGroup}</AmountCell>
           <PriceCell>{`${product.price?.amount} ${product.price?.currency}`}</PriceCell>
           <BaseCell>
             {`${product?.dimensions?.width ?? 0}x${product?.dimensions?.height ?? 0}x${product?.dimensions?.length ?? 0}`}
@@ -162,7 +193,7 @@ function Products() {
         </ProductTr>
       ))}
 
-      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} addProduct={addSelectedProduct} />}
+      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} products={products} setProducts={setProducts} editProduct={editProduct} setEditProduct={setEditProduct}/>}
       <Flex width='100%' justify='flex-end' marginTop='2em'>
         <Pagination actualPage={actualPage} setActualPage={setActualPage} startPage={visiblePageRange.start} endPage={visiblePageRange.end} setVisiblePageRange={setVisiblePageRange} pages={pages}></Pagination>
       </Flex>

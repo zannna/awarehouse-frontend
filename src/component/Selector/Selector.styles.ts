@@ -28,6 +28,5 @@ width: 100%;
 
 export const ListItem = styled.div`
 text-align: left;
-max-width: 100%;
 padding:0.3em;
 `;

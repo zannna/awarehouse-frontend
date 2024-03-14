@@ -7,11 +7,12 @@ import { useState} from 'react';
 import { Product } from '../ProductsApi';
 import {removeProducts} from '../ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
-function Selection({ selectedProducts,
- setSelectedProductsMap,
-    products, setProducts} : {selectedProducts :Product[],
+function Selection({ selectedProducts, setSelectedProductsMap, products, setProducts, setEditProduct, setShowProductCreator} : 
+ {selectedProducts :Product[],
  setSelectedProductsMap: (selectedProducts: Map<number, Product>) => void,
- products: Product[], setProducts: (products: Product[]) => void}) {
+ products: Product[], setProducts: (products: Product[]) => void,
+ setEditProduct: (product: Product | null) => void,
+ setShowProductCreator: (show :boolean) =>void}){
 
     const [showMoveModal, setShowMoveModal] = useState(false);
     const [showNoSelectionWarning, setShowNoSelectionWarning] = useState(false);
@@ -71,7 +72,7 @@ function Selection({ selectedProducts,
             {showMoveModal&& !showNoSelectionWarning  && <Move products={selectedProducts} setShowMoveModal={setShowMoveModal}/>}
             <SmallLine />
             <Image src="/pen.svg" alt="modify" width="1.5em" height="1.5em"></Image>
-            <SmallText onClick={()=>handleShowMoveModal()} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+            <SmallText onClick={()=> { setEditProduct(selectedProducts[0]);  setShowProductCreator(true)}} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
               modify
             </SmallText>
             <SmallLine />
