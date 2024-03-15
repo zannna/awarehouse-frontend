@@ -115,9 +115,7 @@ function Products() {
     });
   };
 
-useEffect(() => {
-setShowProductCreator(!!editProduct);
-},[editProduct]);
+
 
   return (<Background>
     <MainNavigation />

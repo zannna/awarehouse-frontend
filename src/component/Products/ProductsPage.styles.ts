@@ -7,16 +7,6 @@ export const Background = styled.div`
 
  `;
 
- 
-// export const ProductsTable = styled.div`
-// display: grid;
-// grid-template-columns: 12% 10% 10% 10% 15% 13% 10% 10%; 
-// gap: 1em;
-// grid-template-areas: 
-//    "warehouse row shelf tier photo name amount price"; 
-// `;
-
-
 export const BaseCell = styled.div`
   white-space: pre-wrap;
   word-wrap: break-word;

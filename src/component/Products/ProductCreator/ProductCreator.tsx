@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Warehouse, getAdminGroups, getWarehouses, createProduct, ProductCreation, Product, updateProduct } from '../ProductsApi';
 import { currencyMap } from '../../../constants/MapConstants';
 import { useKeycloak } from '@react-keycloak/web';
+import ErrorPopup from '../../ErrorPopup/ErrorPopup';
 function ProductCreator({ setShowProductCreator, products, setProducts, editProduct, setEditProduct }:
   { setShowProductCreator: (show: boolean) => void, products: Product[], setProducts: (product: Product[]) => void, setEditProduct: (product: Product | null) => void, editProduct: Product | null }) {
   const [groups, setGroups] = useState<Map<string, string>>(new Map());
@@ -18,6 +19,7 @@ function ProductCreator({ setShowProductCreator, products, setProducts, editProd
   const { keycloak, initialized } = useKeycloak();
   const [file, setFile] = useState<File>();
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [errorPopup, setErrorPopup] = useState<string | null>(null);
   const [productData, setProductData] = useState<ProductCreation>({
     title: '',
     amountGroup: 0,
@@ -30,6 +32,7 @@ function ProductCreator({ setShowProductCreator, products, setProducts, editProd
 useEffect(() => {
   console.log(editProduct);
 },[editProduct]);
+
   useEffect(() => {
     if (editProduct) {
       setProductData({
@@ -183,31 +186,39 @@ useEffect(() => {
     if (editProduct) {
       updateProduct(keycloak.token, file, {
         ...productData,
-        group : {id: groupId, name: ''},
+        group: { id: groupId, name: '' },
         productWarehouses: warehouses
       }).then(fetchedProduct => {
         const updatedProducts = products.map(product => {
           if (product?.productWarehouses && fetchedProduct?.productWarehouses &&
-            product?.productWarehouses[0]?.productWarehouseId == fetchedProduct?.productWarehouses[0]?.productWarehouseId) {
+            product.productWarehouses[0]?.productWarehouseId === fetchedProduct.productWarehouses[0]?.productWarehouseId) {
             return { ...product, ...fetchedProduct };
           }
           return product;
         });
         setProducts(updatedProducts);
         console.log(fetchedProduct);
-      });
-    }
+      }).catch((error: any) => {
+        if (error && typeof error.message === 'string') {
+          setErrorPopup(error.message);
+        }
+    });
+  }
 
     else {
-      const fetchedProduct = await createProduct(keycloak.token, file, {
+     createProduct(keycloak.token, file, {
         ...productData,
         groupId: groupId,
         productWarehouses: warehouses
-      });
+      }).then(fetchedProduct => {
       addProduct(fetchedProduct);
-      console.log(fetchedProduct);
+      setShowProductCreator(false)
+      }).catch((error: any) => {
+        console.log(error);
+          setErrorPopup(error?.response?.data?.message || 'Error while creating product');   
+      });
+
     }
-    setShowProductCreator(false)
   }
 
   const hiddenFileInput = useRef<HTMLInputElement>(null);
@@ -227,6 +238,7 @@ useEffect(() => {
 
   return (
     <Flex justify='center' align='center'>
+        {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
       <CreationBox>
         <CreationText> create product </CreationText>
         <CreationInputContainer>
@@ -269,16 +281,16 @@ useEffect(() => {
               />
               {imagePreviewUrl && <Image src={imagePreviewUrl} alt="Preview" marginTop="2em" width="100px" height="100px" opacity='100%' />}
             </GridItem>
-             {editProduct == null ??
+             {editProduct == null ?
             <GridItem gridArea="warehouse">
               <Flex gap='1em'>
                 <Text color='#344351' weight='500'>warehouse</Text>
                   <Image src="/square-add.svg" alt="down" width="1.1em" opacity='70%' onClick={() => { addWarehouseElement() }} />
               </Flex>
-            </GridItem>
+            </GridItem> :''
   }
           </ProductGrid>
-          {editProduct == null ?? warehousesElements.map(elementId => (
+          {editProduct == null ? warehousesElements.map(elementId => (
             <Flex width='100%' align='center' justify='space-between' key={elementId}>
               <Flex gap="1em"> name
                 <Selector items={warehouses} selected={null} setSelected={(selectedItem: string[]) => { addWarehouse(elementId, selectedItem) }} ></Selector>
@@ -294,7 +306,7 @@ useEffect(() => {
               </Flex>
               <Image src="/square-minus.svg" alt="down" width="1.1em" opacity='100%' onClick={() => { removeWarehouseElement(elementId) }} />
             </Flex>
-          ))}
+          )): ''}
 
 
           <Flex gap="4em" marginBottom='4em' marginTop='2em'>

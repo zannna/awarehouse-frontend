@@ -8,6 +8,7 @@ import {Dimensions, ShelfCreation, TierCreation, createShelf, ShelfDto, updateSh
 import {metreMap, metreConverter } from '../../../constants/MapConstants'
 import { useCookies } from "react-cookie";
 import { useKeycloak } from '@react-keycloak/web';
+import ErrorPopup from '../../ErrorPopup/ErrorPopup';
 interface ShelfCreatorProps {
     setNewShelf: (data: any) => void;
     addShelf: (shelf: ShelfDto) => void;
@@ -17,12 +18,12 @@ interface ShelfCreatorProps {
   }
   
 function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
-    const [shelfNumber, setShelfNumber] = useState(0);
+    const [shelfNumber, setShelfNumber] = useState('');
     const [shelfName, setShelfName] = useState('');
     const [shelfSize, setShelfSize] = useState(false);
-    const [shelfHeight, setShelfHeight] = useState(0);
-    const [shelfLength, setShelfLength] = useState(0);
-    const [shelfWidth, setShelfWidth] = useState(0);
+    const [shelfHeight, setShelfHeight] = useState('');
+    const [shelfLength, setShelfLength] = useState('');
+    const [shelfWidth, setShelfWidth] = useState('');
     const [sameSizeOfTiers, setSameSizeOfTiers] = useState(false);
     const [showTiers,  setShowTiers] = useState(false);
     const [numberOfTiers, setNumberOfTiers] = useState(0);
@@ -30,7 +31,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
     const [tiers, setTiers] = useState<TierCreation[]>([]);
     const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
     const {keycloak, initialized } = useKeycloak();
-
+    const [errorPopup, setErrorPopup] = useState<string | null>(null);
     useEffect(() => {
       if (props.editShelf) {
         console.log(props.editShelf);
@@ -57,7 +58,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
       setTiers(prevTiers => {
           const newTiers = [...prevTiers];
           for (let i = prevTiers.length; i < numberOfTiers; i++) {
-              newTiers.push({ number: i + 1, name: '', size: false, dimensions: { height: 0, length: 0, width: 0 } });
+              newTiers.push({ number: (i + 1).toString(), name: '', size: false, dimensions: { height: "0", length: "0", width: "0" } });
           }
           if (numberOfTiers < prevTiers.length) {
               return newTiers.slice(0, numberOfTiers);
@@ -98,13 +99,11 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
           console.log(event.target.value);
           event.preventDefault();
           const number = event.target.value;
-        //  if(numberOfTiers==0 && number>0){
               setNumberOfTiers(number) ; 
               setShowTiers(true);
               setTimeout(() => {
                   setShowTiers(true);
               }, 10000);
-         // }
       }
     async function sendShelfCreationRequest(){
       if (props.editShelf) {
@@ -135,9 +134,13 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
             }
           }))
         }
-        const updatedShelf = await updateShelf(keycloak.token, cookies['warehouseId'], shelfData);
+        updateShelf(keycloak.token, cookies['warehouseId'], shelfData).then((updatedShelf) => {
         props.setEditShelf(updatedShelf);
         props.setNewShelf(false);
+        }).catch((error) => {
+          console.log(error);
+          setErrorPopup(error?.response?.data?.message);
+        });
 
       }
       else{
@@ -167,10 +170,12 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
           }))
         }
         console.log(shelfData)
-        const fetchedProduct= await createShelf(keycloak.token, cookies['warehouseId'], shelfData);
-        console.log(fetchedProduct);
-        props.setNewShelf(false);
+        createShelf(keycloak.token, cookies['warehouseId'], shelfData).then((fetchedProduct) => {
         props.addShelf(fetchedProduct);
+        props.setNewShelf(false);
+        }).catch((error) => {
+          setErrorPopup(error?.response?.data?.message);
+        });
       }
     }
 
@@ -181,17 +186,17 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
 
   
   const changeSameSizeOfTiers= (value : boolean)=>{
-    const height =  shelfHeight/numberOfTiers;
-    const length =  shelfLength/numberOfTiers;
-    const width =  shelfWidth/numberOfTiers;
+    const height =   Number(shelfHeight)/numberOfTiers;
+    const length =  Number(shelfLength)/numberOfTiers;
+    const width =   Number(shelfWidth)/numberOfTiers;
     setSameSizeOfTiers(value);
     const updatedTiers = tiers.map((tier, index) => ({    
         ...tier, 
         size: true,
         dimensions: {
-          height:  height,
-          length: length,
-          width: width
+          height:  height.toString(),
+          length: length.toString(),
+          width: width.toString()
         }
       
     }));
@@ -205,7 +210,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
 
     return(
             < CreateShelfContainer  ref={ref}>
-                <div ></div>
+                  {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
                 <Flex justify='flex-end' padding='1em'><Image src="/cancel.svg" alt="add" width='1em' 
                 onClick={()=>{props.setNewShelf(false)}} ></Image></Flex>
                 <BlueMarkText> create shelf</BlueMarkText>
@@ -221,21 +226,21 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
                     <ShelfTableHeaderText>same size of tiers</ShelfTableHeaderText>
                 </ShelfCreationRow>
                 <ShelfCreationRow>
-                <Flex align='center'> <Input value={shelfNumber} onChange={(e) => setShelfNumber(parseFloat(e.target.value))}></Input></Flex>
+                <Flex align='center'> <Input value={shelfNumber} onChange={(e) => setShelfNumber(e.target.value)}></Input></Flex>
                   <NameInput value={shelfName} onChange={(e) => setShelfName(e.target.value)}></NameInput>
                   <input type="checkbox" checked={shelfSize} onChange={(e) => setShelfSize(e.target.checked)} />
                   <Input value={shelfHeight}
                    disabled={!shelfSize}
-                    onChange={(e) => setShelfHeight(parseFloat(e.target.value))}
+                    onChange={(e) => setShelfHeight(e.target.value)}
                     style={{ opacity: !shelfSize ? 0.7 : 1 }}
                     ></Input>
                   <Input value={shelfLength} 
                     disabled={!shelfSize}
-                    onChange={(e) => setShelfLength(parseFloat(e.target.value))}
+                    onChange={(e) => setShelfLength(e.target.value)}
                     style={{ opacity: !shelfSize ? 0.7 : 1 }}></Input>
                   <Input value={shelfWidth} 
                     disabled={!shelfSize}
-                    onChange={(e) => setShelfWidth(parseFloat(e.target.value))}
+                    onChange={(e) => setShelfWidth(e.target.value)}
                     style={{ opacity: !shelfSize ? 0.7 : 1 }}></Input>
                   <Selector items={metreMap} selected={selectedUnit}  setSelected={setSelectedUnit} ></Selector>
                   <Input  onChange={(event)=>{handleNumberOfTiers(event)}} value={numberOfTiers}></Input>

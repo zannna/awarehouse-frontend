@@ -1,30 +1,30 @@
 import { axiosCoreService } from "../../api/axiosConfig";
 export interface Dimensions{
-    width: number;
-    height: number;
-    length: number;
+    width:string;
+    height: string;
+    length: string;
 }
 
 export interface ShelfDto {
     id: string;
-    number: number;
+    number: string;
     name: string;
     size: boolean;
     dimensions: Dimensions;
     unit: string;
     sameSizeTiers: boolean;
-    row: number;
+    row: string;
     tiers: Tier[];
   }
   export interface Tier{
     id: string;
-    number:  number;
+    number:  string;
     name :string;
     size :boolean;
     dimensions: Dimensions;
  }
   export interface ShelfCreation {
-    number: number;
+    number:string;
     name: string;
     size: boolean;
     dimensions: Dimensions;
@@ -35,7 +35,7 @@ export interface ShelfDto {
   
   export interface TierCreation{
     id?: string;
-     number:  number;
+     number:  string;
      name :string;
      size :boolean;
      dimensions: Dimensions;

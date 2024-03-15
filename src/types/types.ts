@@ -47,3 +47,11 @@ export interface GroupData {
   id: string;
   name: string;
 }
+
+export interface BasicError {
+  timestamp: string;
+  statusCode: number;
+  statusText: string;
+  message: string;
+  path: string;
+}

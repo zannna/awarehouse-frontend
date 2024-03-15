@@ -59,12 +59,11 @@ export interface Product{
 }
 const PRODUCT_PATH = '/product';
 export async function createProduct(token :string|undefined, file :File|undefined, data:  ProductCreation) : Promise<Product>{
-    console.log({"title":"cbc"});
     const formData = new FormData();
     if (file) {
         formData.append('file', file);
     }
-   formData.append('product', JSON.stringify(data)); // Konwersja danych produktu na ciąg JSON
+   formData.append('product', JSON.stringify(data)); 
     const response = await axios.post(
         `${CORE_SERVICE}${API_VERSION_URI}${PRODUCT_PATH}`,
         formData,
@@ -184,23 +183,22 @@ export async function getProducts(
     amount: number;
   }
 
-  export async function moveProducts(token: string | undefined, data: MoveProductsDto): Promise<void> {
-      fetch( `${CORE_SERVICE}${API_VERSION_URI}${PRODUCT_PATH}`,{
-        method: 'PATCH',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-             'Content-Type': 'application/json'
-        },
-         body: JSON.stringify(data) 
-      })
-      .then(response => {
-        console.log(response);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-      })
-      
+  export async function moveProducts(token: string | undefined, data: MoveProductsDto): Promise<Response> {
+    const response = await fetch(`${CORE_SERVICE}${API_VERSION_URI}${PRODUCT_PATH}${MOVE_PATH}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'An error occurred while creating the report');
     }
+     
+    return response;
+  }
 
     export interface BasicGroupInfoDto {
         id: string;
@@ -338,9 +336,7 @@ export async function getProducts(
           body: formData,
         });
       
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      
         console.log(response);
         return await response.json(); 
 

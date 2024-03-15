@@ -7,6 +7,8 @@ import { getGroupsAndWarehouses, GroupsAndWarehouses } from './ReportApi';
 import { useKeycloak } from '@react-keycloak/web';
 import Selector from '../Selector/Selector';
 import { ReportData,  createReport, getReports} from './ReportApi';
+import ErrorPopup from '../ErrorPopup/ErrorPopup';
+import { BasicError } from '../../types/types';
 function Report() {
     const [showReportCreation, setShowReportCreation] = useState(false);
     const { keycloak, initialized } = useKeycloak();
@@ -20,6 +22,7 @@ function Report() {
     const [selectedInterval, setSelectedInterval] = useState<string>("");
     const [email, setEmail] = useState("");
     const [reports, setReports] = useState<ReportData[]>([]);
+    const [errorPopup, setErrorPopup] = useState<string | null>(null);
     const handleScopeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedScope(event.target.value);
     };
@@ -33,9 +36,9 @@ function Report() {
             getReports(keycloak.token).then((fetchedReports) => {
                 setReports(fetchedReports);
             });
-
-            const fetchedGroupsAndWarehouses = await getGroupsAndWarehouses(keycloak.token);
-
+            let fetchedGroupsAndWarehouses: GroupsAndWarehouses;
+            fetchedGroupsAndWarehouses = await getGroupsAndWarehouses(keycloak.token);
+        
             const newGroups = fetchedGroupsAndWarehouses.groupWithWarehouses.reduce((acc, groupWithWarehouse) => {
                 acc.set(groupWithWarehouse.group.id, groupWithWarehouse.group.name);
                 return acc;
@@ -73,14 +76,19 @@ function Report() {
             reportInterval: selectedInterval.toUpperCase(),
             email: email
         }
-        createReport(keycloak.token,  reportData).then((response) => {
-            setShowReportCreation(false);
-        });
+        createReport(keycloak.token, reportData)
+  .then(response => {
+    setShowReportCreation(false);
+  })
+  .catch(error => {
+    setErrorPopup(error.message);
+  });
     }
 
     return (
         <Background>
             <MainNavigation />
+            {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
             <Flex direction='column' marginTop='5em' width='auto' gap='3em'>
                 <BlueText>
                     <Flex>

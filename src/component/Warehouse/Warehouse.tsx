@@ -17,9 +17,19 @@ function Warehouse() {
     },[shelves]);
 
     useEffect(() => {
-       getShelves(keycloak.token, cookies.warehouseId).then((shelves) => {
-        console.log(shelves);
-              setShelves(shelves);
+       getShelves(keycloak.token, cookies.warehouseId).then((fetchedShelves) => {
+        console.log(fetchedShelves);
+        const convertedShelves = fetchedShelves.map(shelf => ({
+            ...shelf,
+            row: shelf.row.toString(),
+            number: shelf.number.toString(),
+            tiers: shelf.tiers.map(tier => ({
+              ...tier,
+              number: tier.number.toString()
+            }))
+          }));
+        
+          setShelves(convertedShelves);
          });
         getRowsNumber(keycloak.token, cookies.warehouseId).then((rowsNumber) => {
             console.log(rowsNumber);
@@ -63,7 +73,7 @@ function Warehouse() {
             </Flex>
             <WarehouseTable>
             {Array.from({ length: rowsNumber }, (_, index) => (
-               <ShelfAccordion key={index} setShelves={setShelves} shelves={shelves.filter(shelf => shelf.row === index+1)} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
+               <ShelfAccordion key={index} setShelves={setShelves} shelves={shelves.filter(shelf => shelf.row === (index+1).toString())} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
                updateShelvesAfterShelfRemoval={updateShelvesAfterShelfRemoval}
                ></ShelfAccordion>
                ))}

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import {moveProducts, MoveProductsDto,  ProductWarehouseMoveInfo, getWarehouses} from '../ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
 import Selector from '../../Selector/Selector';
-
+import ErrorPopup from '../../ErrorPopup/ErrorPopup';
 function Move({ products, setShowMoveModal }: { products: Product[], setShowMoveModal: (show: boolean) => void }) {
     const [shelfNumber, setShelfNumber] = useState<number>();
     const [tierNumber, setTierNumber] = useState<number>();
@@ -15,6 +15,7 @@ function Move({ products, setShowMoveModal }: { products: Product[], setShowMove
     const [warehouses, setWarehouses] = useState<Map<string, string>>(new Map());
     const [selectedWarehouse, setSelectedWarehouse] = useState<string[]>();
     const [productNumber, setProductNumber] = useState<number>(0);
+    const [errorPopup, setErrorPopup] = useState<string | null>(null);
     useEffect(() => {
         const fetchWarehouses = async () => {
           const fetchedWarehouses = await getWarehouses(keycloak.token);
@@ -45,16 +46,16 @@ function Move({ products, setShowMoveModal }: { products: Product[], setShowMove
             tierNumber: tierNumber as number 
         }
         console.log(moveProduct)
-        moveProducts( keycloak.token, moveProduct);
-        setShowMoveModal(false);
+        moveProducts( keycloak.token, moveProduct).then((status)=>{
+            setShowMoveModal(false)
+        }).catch((error)=>{setErrorPopup(error.message)})
     
     }
-    // const addWarehouse = (elementId: string, selectedItem: string[]) => {
-    //     setSelectedWarehouse(prev => new Map(prev).set(elementId, selectedItem[0]));
-    // }
+
 
     return (
                 <ModalContainer>
+                     {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
                     <Modal>
                         <Flex justify='flex-end' marginTop='2em' marginRight='2em'>
                             <CancelImage onClick={() => handleClose()} src="/cancel.svg" alt="add warehouse"></CancelImage>

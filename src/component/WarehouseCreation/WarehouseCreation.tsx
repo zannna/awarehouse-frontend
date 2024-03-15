@@ -8,9 +8,12 @@ import { useNavigate } from 'react-router-dom';
 import { useKeycloak } from '@react-keycloak/web';
 import {unitMap} from '../../constants/MapConstants'
 import { CookiesProvider, useCookies } from "react-cookie";
+import { BasicError } from '../../types/types';
+import ErrorPopup from '../ErrorPopup/ErrorPopup';
 import React from 'react'
 function WarehouseCreation(){
-    const [error, setError] = useState<string | undefined>(undefined);
+    const [error, setError] = useState<string | null>(null);
+    const [errorPopup, setErrorPopup] = useState<string | null>(null);
     const [groups, setGroups] = useState<GroupData[]>([]);
     const { keycloak, initialized } = useKeycloak();
     const [selectedGroup, setSelectedGroup] = useState<{ [key: string]: GroupData }>({});
@@ -79,25 +82,30 @@ function WarehouseCreation(){
         return true;
     }
     const sendWarehouseCreationRequest= async () =>{
-      if( isWarehouseCreationValid()){
         const groupIds = Object.values(selectedGroup).map(group => group.id);
         const warehouseCreation: Warehouse = {
-          name: name,
-          numberOfRows: numberOfRows,
-          unit: "METER",
-          groupIds: groupIds
-      }
-      console.log(warehouseCreation);
-      const warehouse= await createWarehouse(keycloak.token, warehouseCreation);
-      setCookie("warehouseId", warehouse.id);
-      setCookie("warehouseName", warehouse.name);
-      navigate('/p');
-      }
+            name: name,
+            numberOfRows: numberOfRows,
+            unit: "METER",
+            groupIds: groupIds
+        };
+        console.log(warehouseCreation);
+        try {
+        const warehouse = await createWarehouse(keycloak.token, warehouseCreation);
+        setCookie("warehouseId", warehouse.id);
+        setCookie("warehouseName", warehouse.name);
+        navigate('/p');
+    } catch (error : BasicError | any) {
+      console.log(error);
+        const errorMessage = error.response?.data?.message || 'Unexpected error occurred. Please try again later.';
+        setErrorPopup(errorMessage);
+    }
 
   }
     
 return (<Background>
     <MainContainer>
+    {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
       <LogoContainer> 
             A<Text size='0.5em'>warehouse</Text>
         </LogoContainer>

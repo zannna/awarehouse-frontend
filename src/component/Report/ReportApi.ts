@@ -30,22 +30,21 @@ reportInterval: string;
 email: string;
 entityName?: string;
 }
-export async function createReport(token: string|undefined, report: ReportData) : Promise<void>{
- const respone= fetch( `${CORE_SERVICE}${API_VERSION_URI}${REPORT_PATH}/understock`,{
+export async function createReport(token: string|undefined, report: ReportData) : Promise<Response>{
+ const response= await fetch( `${CORE_SERVICE}${API_VERSION_URI}${REPORT_PATH}/understock`,{
     method: 'POST',
     headers: {
         'Authorization': `Bearer ${token}`,
          'Content-Type': 'application/json'
     },
      body: JSON.stringify(report) 
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  return respone;
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'An error occurred while creating the report');
+  }
+   
+  return response;
 
 }
 
