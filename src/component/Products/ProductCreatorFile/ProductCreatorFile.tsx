@@ -1,41 +1,75 @@
 import { Flex, Background, Text, Image } from '../../../styles/globalStyles.styles';
+import { ProductCreatorFileContainer, Input } from './ProductCreatorFile.styles';
 import { useState } from 'react';
 import Selector from '../../Selector/Selector';
 import { useKeycloak } from '@react-keycloak/web';
-function ProductCreatorFile() {
+import { CORE_SERVICE, API_VERSION_URI, PRODUCT_PATH, WAREHOUSE_PATH } from "../../../api/axiosConfig";
+import { useRef } from 'react';
+function ProductCreatorFile({setShowModal,  warehouseId, reset}:{setShowModal:(show:boolean)=>void,  warehouseId: any, reset:()=>void}) {
     const { keycloak, initialized } = useKeycloak();
-    const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
-    const [selectedWarehouse, setSelectedWarehouse] = useState<string[]>([]);
-    const [groups, setGroups] = useState<Map<string, string>>(new Map());
-    const [warehouses, setWarehouses] = useState<Map<string, string>>(new Map());
-    const [selectedScope, setSelectedScope] = useState<string>("group");
-    const handleScopeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedScope(event.target.value);
+    const [file, setFile] = useState<File | null>(null);
+    const hiddenFileInput = useRef<HTMLInputElement>(null);
+
+    const handleUploadFile = (event: React.MouseEvent<HTMLImageElement>) => {
+        hiddenFileInput.current?.click();
     };
-    
-  return (
-    <Flex direction='column' width='100%' gap='0.5em'>
-    <Flex gap='1em' align='center'>
-        <input type='radio'
-            value="group"
-            checked={selectedScope === "group"}
-            onChange={handleScopeChange}
-        ></input> group
-        {selectedScope === "group" &&
-            <Selector items={groups} setSelected={setSelectedGroup} selected={selectedGroup}></Selector>
-        }
-    </Flex>
-    <Flex gap='1em' align='center'>
-        <input type='radio'
-            value="warehouse"
-            checked={selectedScope === "warehouse"}
-            onChange={handleScopeChange}
-        ></input> warehouse
-        {selectedScope === "warehouse" &&
-            <Selector items={warehouses} setSelected={setSelectedWarehouse} selected={selectedWarehouse}></Selector>
-        }
-    </Flex>
-</Flex>
-  );
+
+    const uploadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files) return;
+        setFile(e.target.files[0]);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e?.target?.result;
+
+        };
+        reader.readAsText(e.target.files![0]);
+    };
+
+    const sendUploadFileRequest = () => {
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch(`${CORE_SERVICE}${API_VERSION_URI}${PRODUCT_PATH}/import${WAREHOUSE_PATH}/${warehouseId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${keycloak.token}`,
+            },
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                setShowModal(false);
+                reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    };
+
+    return (
+        <ProductCreatorFileContainer>
+            <Flex justify='flex-end' width='100%'>
+                <Image src={"cancel.svg"} alt="cancel" width="0.8em" height="0.8em" opacity='50%' onClick={() => {setShowModal(false) }}></Image>
+            </Flex>
+            <Flex direction='column' gap='0.5em' align='center'>
+            <Flex gap='1em' width='fit-content' marginLeft='2em' marginRight='2em'>
+                <Text >add csv file</Text>
+                <Image src="/square-add.svg" alt="down" width="1.2em" opacity='70%' onClick={(e) => { handleUploadFile(e) }} />
+
+            </Flex>
+            {file && <Text size='0.7em'>selected: {file.name}</Text>}
+            </Flex>
+            <input
+                type="file"
+                // accept=".csv,.xls,.xlsx"
+                onChange={uploadFile}
+                ref={hiddenFileInput}
+                style={{ display: 'none' }}
+            />
+            <Image src="/accept.svg" opacity='100%' width='1.7em' height='1.7em' alt="accept" onClick={() => { sendUploadFileRequest() }}></Image>
+        </ProductCreatorFileContainer>
+    );
 }
 export default ProductCreatorFile;

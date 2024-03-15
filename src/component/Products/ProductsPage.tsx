@@ -1,9 +1,10 @@
 import {
   AmountCell, Background, PhotoCell, ProductsTable, ProductTr, RowCell, IdCell, WarehouseCell, ShelfCell, TierCell, NameCell, PriceCell, FirstIdCell,
-  FirstWarehouseCell, FirstBaseCell, FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AddWarehouseImage, BaseCell
+  FirstWarehouseCell, FirstBaseCell, FirstNameCell, FirstAmountCell, FirstPhotoCell, FirstPriceCell, FirstRowCell, FirstShelfCell, FirstTierCell, MarkCell, AbsoluteContainer, BaseCell
 } from './ProductsPage.styles';
 import MainNavigation from '../Header/MainNavigation';
-import ProductWarehouse from './ProductWarehouses/ProductWarehouses'
+import ProductWarehouse from './ProductWarehouses/ProductWarehouses';
+import ProductCreatorFile from './ProductCreatorFile/ProductCreatorFile';
 import Selection from './Selection/Selection';
 import ProductCreator from './ProductCreator/ProductCreator';
 import { Flex, Image, GreenText, SmallText, Line, SmallLine, Checkbox } from '../../styles/globalStyles.styles';
@@ -17,6 +18,7 @@ import Pagination from '../Pagination/Pagination';
 import { pageSize } from '../../constants/Constants';
 function Products() {
   const [showProductCreator, setShowProductCreator] = useState(false);
+  const [showProductCreatorFile, setShowProductCreatorFile] = useState(false);
   const [selectedProductsMap, setSelectedProductsMap] = useState<Map<number, Product>>(new Map());
   const { keycloak, initialized } = useKeycloak();
   const [cookies] = useCookies(["warehouseId", "warehouseName"]);
@@ -43,6 +45,11 @@ function Products() {
       }
     });
   };
+  
+  const [seed, setSeed] = useState(1);
+       const reset = () => {
+            setSeed(Math.random());
+        }
 
   useEffect(() => {
     if (selectedWarehouses && selectedWarehouses.length > 0) {
@@ -51,17 +58,17 @@ function Products() {
       getProducts(keycloak.token, warehouseIds, sortConditions, searchConditions, actualPage, pageSize).then((products) => {
         setProducts(products.content);
         console.log(products.totalPages);
-        setPages(products.totalPages);  
-        if(visiblePageRange.end > products.totalPages-1)
-          {setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages-1 });
-      }
+        setPages(products.totalPages);
+        if (visiblePageRange.end > products.totalPages - 1) {
+          setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages - 1 });
+        }
         if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
           let newStart = Math.max(0, actualPage - 2);
           let newEnd = 4;
-          if(newEnd>products.totalPages-1){
-            newEnd=products.totalPages-1;
+          if (newEnd > products.totalPages - 1) {
+            newEnd = products.totalPages - 1;
           }
-          if (actualPage > 2){
+          if (actualPage > 2) {
             newEnd = Math.min(products.totalPages - 1, actualPage + 2);
           }
           console.log(newStart, newEnd);
@@ -72,23 +79,23 @@ function Products() {
         setProducts([]);
       });
     }
-  }, [selectedWarehouses, actualPage, searchConditions, sortConditions]);
+  }, [selectedWarehouses, actualPage, searchConditions, sortConditions, seed]);
 
   useEffect(() => {
     const groupIds = selectedGroup.map(group => group.id);
-    if(groupIds.length === 0) return;
+    if (groupIds.length === 0) return;
     setSelectedWarehouses([]);
     getProductsByGroup(keycloak.token, sortConditions, searchConditions, groupIds, actualPage, pageSize).then((products) => {
       setProducts(products.content);
       setPages(products.totalPages);
-      if(visiblePageRange.end > products.totalPages-1)
-      {setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages-1 });
-  }
+      if (visiblePageRange.end > products.totalPages - 1) {
+        setVisiblePageRange({ start: visiblePageRange.start, end: products.totalPages - 1 });
+      }
       if (actualPage < visiblePageRange.start || actualPage > visiblePageRange.end || visiblePageRange.start === visiblePageRange.end) {
         let newStart = Math.max(0, actualPage - 2);
         let newEnd = 4;
-        if(newEnd>products.totalPages-1){
-          newEnd=products.totalPages-1;
+        if (newEnd > products.totalPages - 1) {
+          newEnd = products.totalPages - 1;
         }
         if (actualPage > 2)
           newEnd = Math.min(products.totalPages - 1, actualPage + 2);
@@ -99,18 +106,18 @@ function Products() {
       setProducts([]);
     });
 
-  },[selectedGroup,  actualPage]);
+  }, [selectedGroup, actualPage]);
 
-  const handleCheckboxChange = (uniqueId :number, product :Product, isChecked :boolean) => {
+  const handleCheckboxChange = (uniqueId: number, product: Product, isChecked: boolean) => {
     setSelectedProductsMap(prevMap => {
       const newMap = new Map(prevMap);
-  
+
       if (isChecked) {
         newMap.set(uniqueId, product);
       } else {
         newMap.delete(uniqueId);
       }
-  
+
       return newMap;
     });
   };
@@ -120,7 +127,7 @@ function Products() {
   return (<Background>
     <MainNavigation />
     <ProductWarehouse selectedWarehouses={selectedWarehouses} setSelectedWarehouses={setSelectedWarehouses}
-      selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} setActualPage={setActualPage}/>
+      selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} setActualPage={setActualPage} />
     <Filter updateSearch={searchConditions} updateSearchConditions={updateSearchConditions} sortConditions={sortConditions} setSortConditions={setSortConditions} />
     <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
       <Flex align="center">
@@ -130,14 +137,21 @@ function Products() {
         <Image src="/pointer.svg" alt="pointer" width="0.8em" opacity="0.8"></Image>
         <SmallText onClick={() => { setShowProductCreator(true) }}>manually</SmallText>
         <SmallLine />
-        <Image src="/file.svg" alt="file" width="1em" opacity="0.4"></Image>
-        <SmallText>from file</SmallText>
+        <AbsoluteContainer>
+          <Flex align="center">
+            <Image src="/file.svg" alt="file" width="1em" opacity="0.4"></Image>
+            <SmallText onClick={() => setShowProductCreatorFile(true)}>from file</SmallText>
+            {showProductCreatorFile && <ProductCreatorFile setShowModal={setShowProductCreatorFile} warehouseId={cookies.warehouseId ?? ''} reset={reset}/>}
+          </Flex>
+        </AbsoluteContainer>
         <SmallLine />
-        <Image src="/website.svg" alt="website" width="1em"></Image>
-        <SmallText> from site</SmallText>
+        <Flex align="center">
+          <Image src="/website.svg" alt="website" width="1em"></Image>
+          <SmallText>from site</SmallText>
+        </Flex>
       </Flex>
-      <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products} 
-      setProducts={setProducts} setEditProduct={setEditProduct}  setShowProductCreator={setShowProductCreator} ></Selection>
+      <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products}
+        setProducts={setProducts} setEditProduct={setEditProduct} setShowProductCreator={setShowProductCreator} ></Selection>
     </Flex>
     <ProductsTable>
       <ProductTr isSelected={false}>
@@ -185,13 +199,13 @@ function Products() {
             <Checkbox
               type="checkbox"
               checked={selectedProductsMap.has(index)}
-              onChange={(e) => handleCheckboxChange(index, product,  e.target.checked)}
+              onChange={(e) => handleCheckboxChange(index, product, e.target.checked)}
             />
           </MarkCell>
         </ProductTr>
       ))}
 
-      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} products={products} setProducts={setProducts} editProduct={editProduct} setEditProduct={setEditProduct}/>}
+      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} products={products} setProducts={setProducts} editProduct={editProduct} setEditProduct={setEditProduct} />}
       <Flex width='100%' justify='flex-end' marginTop='2em'>
         <Pagination actualPage={actualPage} setActualPage={setActualPage} startPage={visiblePageRange.start} endPage={visiblePageRange.end} setVisiblePageRange={setVisiblePageRange} pages={pages}></Pagination>
       </Flex>

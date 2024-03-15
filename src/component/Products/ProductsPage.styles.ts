@@ -6,6 +6,12 @@ export const Background = styled.div`
   padding: 4em; 
 
  `;
+ export const AbsoluteContainer= styled.div`
+ width: fit-content;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+ `;
 
 export const BaseCell = styled.div`
   white-space: pre-wrap;

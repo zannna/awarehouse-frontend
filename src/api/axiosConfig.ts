@@ -10,6 +10,8 @@ export const WAREHOUSE_PATH = '/warehouse';
 
 export const REPORT_PATH = '/report';
 
+export const PRODUCT_PATH = '/product';
+
 export const axiosCoreService = axios.create({
     baseURL: CORE_SERVICE+ API_VERSION_URI,
     headers: {
