@@ -5,9 +5,11 @@ import Selector from '../../Selector/Selector';
 import { useKeycloak } from '@react-keycloak/web';
 import { CORE_SERVICE, API_VERSION_URI, PRODUCT_PATH, WAREHOUSE_PATH } from "../../../api/axiosConfig";
 import { useRef } from 'react';
+import ErrorPopup from '../../ErrorPopup/ErrorPopup';
 function ProductCreatorFile({setShowModal,  warehouseId, reset}:{setShowModal:(show:boolean)=>void,  warehouseId: any, reset:()=>void}) {
     const { keycloak, initialized } = useKeycloak();
     const [file, setFile] = useState<File | null>(null);
+    const [errorPopup, setErrorPopup] = useState<string | null>(null);
     const hiddenFileInput = useRef<HTMLInputElement>(null);
 
     const handleUploadFile = (event: React.MouseEvent<HTMLImageElement>) => {
@@ -40,16 +42,22 @@ function ProductCreatorFile({setShowModal,  warehouseId, reset}:{setShowModal:(s
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                setShowModal(false);
+                if(data.allRecords){
+                setErrorPopup("saved "+ data?.savedRecords +"/"+ data?.allRecords + " records.")
                 reset();
+                }
+                else{
+                    setErrorPopup(data.message)
+                }
             })
             .catch(error => {
-                console.error('Error:', error);
+                setErrorPopup(error.message);
             });
     };
 
     return (
         <ProductCreatorFileContainer>
+               {errorPopup && <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />}
             <Flex justify='flex-end' width='100%'>
                 <Image src={"cancel.svg"} alt="cancel" width="0.8em" height="0.8em" opacity='50%' onClick={() => {setShowModal(false) }}></Image>
             </Flex>
@@ -63,7 +71,7 @@ function ProductCreatorFile({setShowModal,  warehouseId, reset}:{setShowModal:(s
             </Flex>
             <input
                 type="file"
-                // accept=".csv,.xls,.xlsx"
+                accept=".csv"
                 onChange={uploadFile}
                 ref={hiddenFileInput}
                 style={{ display: 'none' }}
