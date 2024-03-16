@@ -6,7 +6,6 @@ import UserWarehouses from "./component/UserWarehouses/UserWarehouses";
 import Products from "./component/Products/ProductsPage";
 import ProductsInWarehouse from './component/Products/ProductsInWarehouse/ProductsInWarehouse'
 import Warehouse from "./component/Warehouse/Warehouse";
-import FreePlace from "./component/FreePlace/FreePlace";
 import Group from "./component/Group/Group";
 import Login from "./component/Register/Register";
 import PrivateRoutes from './PrivateRoutes';
@@ -22,16 +21,15 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route
-          path={'/'}
+          path={'/warehouse'}
           element={
             <PrivateRoutes>
               <Warehouse />
             </PrivateRoutes>
-
           }
         />
         <Route
-          path={'/t'}
+          path={'/token'}
           element={
             <PrivateRoutes>
               <Token />
@@ -39,14 +37,13 @@ function App() {
 
           }
         />
-        {/* <Route path="/" element={<Warehouse />} /> */}
-        <Route path="/p" element={
+        <Route path="/product" element={
           <PrivateRoutes>
             <Products />
           </PrivateRoutes>
         } />
         <Route
-          path={'/pw'}
+          path={'/warehouse/product'}
           element={
             <PrivateRoutes>
               <ProductsInWarehouse />
@@ -54,16 +51,21 @@ function App() {
 
           }
         />
-        <Route path="/f" element={<FreePlace />} />
-        <Route path="/g" element={
+        <Route path="/group" element={
           <PrivateRoutes>
             <Group />
           </PrivateRoutes>
         } />
-        <Route path="/r" element={<Register />} />
-        <Route path="/o" element={<Options />} />
+        <Route path="/group" element={
+          <PrivateRoutes>
+            <Route path="/report" element={<Register />} />
+          </PrivateRoutes>} />
+        <Route path="/group" element={
+          <PrivateRoutes>
+            <Route path="/option" element={<Options />} />
+          </PrivateRoutes>} />
         <Route
-          path={'/wc'}
+          path={'/warehouse/creation'}
           element={
             <PrivateRoutes>
               <WarehouseCreation />
@@ -72,7 +74,7 @@ function App() {
           }
         />
         <Route
-          path={'/j'}
+          path={'/join'}
           element={
             <PrivateRoutes>
               <Join />
@@ -81,7 +83,7 @@ function App() {
           }
         />
         <Route
-          path={'/ws'}
+          path={'/warehouse/selection'}
           element={
             <PrivateRoutes>
               <WarehouseSelection />
@@ -90,7 +92,7 @@ function App() {
           }
         />
         <Route
-          path={'/re'}
+          path={'/report'}
           element={
             <PrivateRoutes>
               <Report />

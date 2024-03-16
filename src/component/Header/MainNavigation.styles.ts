@@ -100,3 +100,39 @@ export const WarehouseText = styled.div`
 padding: 0.3em;
 cursor: pointer; 
 `;
+
+export const Popup = styled.div`
+position: absolute;
+background: #FFFFFF;
+border: 1px solid  #8c8c8c;
+padding: 1em;
+padding-bottom: 1.5em;
+top:95%;
+left:0;
+display: flex;
+flex-direction: column;
+gap: 2em;
+min-width:5em;
+white-space: nowrap;
+justify-content: center;
+align-items: center;
+width: 80%;
+z-index: 2;
+`;
+
+export const PopupItem =styled.div`
+color: #6A6A6A;
+font-size: 0.9em;
+font-weight: 600;
+cursor: pointer;
+&:hover {
+  opacity: 0.8;
+}
+`;
+
+export const SelectionContainer = styled.div`
+position:relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

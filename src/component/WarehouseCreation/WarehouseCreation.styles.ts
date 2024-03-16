@@ -85,18 +85,3 @@ display: grid;
 justify-content:center;
 align-items:center;
 `;
-// .container {  display: grid;
-//   grid-template-columns: 0.8fr 1.6fr 1fr;
-//   grid-template-rows: 1fr;
-//   grid-auto-columns: 1fr;
-//   gap: 0px 0px;
-//   grid-auto-flow: row;
-//   grid-template-areas:
-//     "name selector button";
-// }
-
-// .name { grid-area: name; }
-
-// .selector { grid-area: selector; }
-
-// .button { grid-area: button; }

@@ -31,7 +31,6 @@ function Products() {
   const [sortConditions, setSortConditions] = useState({});
   const [selectedGroup, setSelectedGroup] = useState<Group[]>([]);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
-
   const updateSearchConditions = (key: string, value: string) => {
     setSearchConditions(prevConditions => {
       if (prevConditions.hasOwnProperty(key)) {

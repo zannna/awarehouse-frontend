@@ -94,7 +94,7 @@ function WarehouseCreation(){
         const warehouse = await createWarehouse(keycloak.token, warehouseCreation);
         setCookie("warehouseId", warehouse.id);
         setCookie("warehouseName", warehouse.name);
-        navigate('/p');
+        navigate('/product');
     } catch (error : BasicError | any) {
       console.log(error);
         const errorMessage = error.response?.data?.message || 'Unexpected error occurred. Please try again later.';
