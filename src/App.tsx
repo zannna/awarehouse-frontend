@@ -16,6 +16,7 @@ import Token from './component/Token/Token';
 import Join from './component/Join/Join'
 import WarehouseSelection from './component/WarehouseSelection/WarehouseSelection'
 import Report from './component/Report/Report'
+import Description from './component/Description/Description'
 function App() {
   return (
     <BrowserRouter>
@@ -98,6 +99,13 @@ function App() {
               <Report />
             </PrivateRoutes>
 
+          }
+        />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path={'/'}
+          element={
+              <Description />
           }
         />
       </Routes>

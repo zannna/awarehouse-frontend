@@ -111,7 +111,7 @@ top:95%;
 left:0;
 display: flex;
 flex-direction: column;
-gap: 2em;
+gap: 1em;
 min-width:5em;
 white-space: nowrap;
 justify-content: center;
@@ -135,4 +135,11 @@ position:relative;
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+export const Separator = styled.div`
+  height: 1px;
+  width: 80%;
+  background-color: #8c8c8c;
+
 `;

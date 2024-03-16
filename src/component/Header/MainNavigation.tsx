@@ -1,6 +1,6 @@
 import {
     Background, Header, SelectionContainer, LogoContainer, Logo, Line, ViewOption, ArrowDownImage, ActualWarehouse, ActualText,
-    WarehouseSelector, Options, WarehouseList, WarehouseText, Popup, PopupItem
+    WarehouseSelector, Options, WarehouseList, WarehouseText, Popup, PopupItem, Separator
 } from './MainNavigation.styles';
 import { Flex, Box } from '../../styles/globalStyles.styles';
 import { useState, useEffect } from 'react';
@@ -50,6 +50,7 @@ function MainNavigation() {
                     </ViewOption>
                     {showProductPopup && <Popup onMouseLeave={toggleProductPopup}>
                         <PopupItem onClick={()=>navigate('/product')}>manage</PopupItem>
+                        <Separator></Separator>
                         <PopupItem onClick={()=>navigate('/warehouse/product')}>show by tier</PopupItem>
                     </Popup>}
                 </SelectionContainer>
@@ -61,7 +62,9 @@ function MainNavigation() {
                     </ViewOption>
                     {showWarehousePopup && <Popup onMouseLeave={toggleWarehousePopup}>
                         <PopupItem onClick={()=>navigate('/warehouse')}>manage</PopupItem>
+                        <Separator></Separator>
                         <PopupItem onClick={()=>navigate('/token')}>token</PopupItem>
+                        <Separator></Separator>
                         <PopupItem onClick={()=>navigate('/group')}>groups</PopupItem>
                     </Popup>}
                 </SelectionContainer>
@@ -73,6 +76,7 @@ function MainNavigation() {
                     </ViewOption>
                     {showProfilePopup && <Popup onMouseLeave={toggleProfilePopup}>
                         <PopupItem  onClick={()=>navigate('/report')}>reports</PopupItem>
+                        <Separator></Separator>
                         <PopupItem  onClick={() => keycloak.logout()}>logout</PopupItem>
                     </Popup>}
                 </SelectionContainer>

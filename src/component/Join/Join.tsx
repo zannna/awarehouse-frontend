@@ -22,7 +22,7 @@ function Join(){
         );
         if(response.status==200){
             
-            navigate('/p');
+            navigate('/product');
         }
     }
     return(

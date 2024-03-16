@@ -104,7 +104,7 @@ function Register() {
                     onChange={event => changePassword(event.target.value)}
                 ></Input>
             </InputWrapper>
-            {!validPassword && (
+            {password && !validPassword && (
                 <Text size='0.8em' color='red'>
                     Password must be at least 8 characters long and include uppercase and lowercase letters, a number, and a special character.
                 </Text>
@@ -116,14 +116,14 @@ function Register() {
                     onChange={event => changeRepeatedPassword(event.target.value)}
                 ></Input>
             </InputWrapper>
-            {!validRepeatedPassword && (
+            {repeatedPassword && !validRepeatedPassword && (
                 <Text size='0.8em' color='red'>
                     The repeated password does not match the original.
                 </Text>
             )}
             <Text size='0.7em' color='red'>{error != undefined ? error : ''}</Text>
             <Flex justify='center' gap="3em" width="50%" marginTop="2em" marginBottom="3em">
-                <GreyButton>CANCEL</GreyButton>
+                <GreyButton onClick={()=>{navigate("/")}}>CANCEL</GreyButton>
                 <BlueButton onClick={() => sendRegisterRequest()}>LOGIN</BlueButton>
             </Flex>
         </LoginContainer>

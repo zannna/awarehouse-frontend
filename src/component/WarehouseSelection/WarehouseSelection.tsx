@@ -30,7 +30,7 @@ function WarehouseSelection() {
     const handleWarehouseSelection = (warehouseId: string, name :string) => {
         setCookie("warehouseId", warehouseId);
         setCookie("warehouseName", name);
-        navigate("/p");
+        navigate("/product");
     }
     return (
     <Background>
