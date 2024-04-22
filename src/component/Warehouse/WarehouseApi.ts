@@ -13,7 +13,7 @@ export interface ShelfDto {
     dimensions: Dimensions;
     unit: string;
     sameSizeTiers: boolean;
-    row: string;
+    row: string|number;
     tiers: Tier[];
   }
   export interface Tier{

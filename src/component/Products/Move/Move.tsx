@@ -36,7 +36,7 @@ function Move({ products, setShowMoveModal }: { products: Product[], setShowMove
         const productsToMove : ProductWarehouseMoveInfo[]= products.map(product => {
             return {
                 productWarehouseId: product.productWarehouses?.at(0)?.productWarehouseId as string,
-                amount: productNumber? productNumber : product.amountGroup as number 
+                amount: productNumber ? productNumber : (product.productWarehouses?.at(0)?.amount || 0.0) 
             }
         });
         const moveProduct : MoveProductsDto={
@@ -84,7 +84,7 @@ function Move({ products, setShowMoveModal }: { products: Product[], setShowMove
                                             <BaseCell>  {product.image ? <Image src={`data:image/jpeg;base64,${product.image}`} alt="Product" height='80px' width='80px' opacity='100%' /> : ''}</BaseCell>
                                             <BaseCell>{product.title}</BaseCell>
                                             <LastBaseCell>
-                                                <AmountInput placeholder={product.amountGroup?.toString()} onChange={((e)=>{setProductNumber(Number(e.target.value))})}></AmountInput>
+                                                <AmountInput placeholder={product.productWarehouses?.at(0)?.amount?.toString()} onChange={((e)=>{setProductNumber(Number(e.target.value))})}></AmountInput>
                                             </LastBaseCell></>
                                       
                                     ))

@@ -58,6 +58,7 @@ border: 1px solid #cfcfcf;
 padding: 0.5em;
 gap:1em;
 cursor: pointer;
+z-index: 3;
 `;
 
 export const RoleTr = styled.div<{ isSelected: boolean }>`

@@ -60,6 +60,12 @@ function Warehouse() {
         });
     }
 
+    function addShelf(shelf: ShelfDto){
+        const newShelves = [...shelves, shelf];
+        setShelves(newShelves);
+    }
+    useEffect(()=>{ console.log(shelves.filter(shelf => shelf.row === '3' ||  shelf.row ===3))},[shelves])
+
     return <Background>
          <MainNavigation />
          <Flex width='100%' direction='column' marginTop='3.5em'>
@@ -73,7 +79,7 @@ function Warehouse() {
             </Flex>
             <WarehouseTable>
             {Array.from({ length: rowsNumber }, (_, index) => (
-               <ShelfAccordion key={index} setShelves={setShelves} shelves={shelves.filter(shelf => shelf.row === (index+1).toString())} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
+               <ShelfAccordion key={index} setShelves={setShelves} addShelf={addShelf} shelves={shelves.filter(shelf => shelf.row === (index+1).toString() || shelf.row === index+1)} row={index+1}  updateShelfStateAfterTierRemoval={ updateShelfStateAfterTierRemoval}
                updateShelvesAfterShelfRemoval={updateShelvesAfterShelfRemoval}
                ></ShelfAccordion>
                ))}

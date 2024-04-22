@@ -15,4 +15,5 @@ padding: 2em;
 top:0;
 left: 110%;
 white-space: nowrap;
+z-index:3;
 `

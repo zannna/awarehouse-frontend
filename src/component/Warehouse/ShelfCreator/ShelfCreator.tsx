@@ -58,7 +58,7 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
       setTiers(prevTiers => {
           const newTiers = [...prevTiers];
           for (let i = prevTiers.length; i < numberOfTiers; i++) {
-              newTiers.push({ number: (i + 1).toString(), name: '', size: false, dimensions: { height: "0", length: "0", width: "0" } });
+              newTiers.push({ number: (i + 1).toString(), name: '', size: false, dimensions: { height: "", length: "", width: "" } });
           }
           if (numberOfTiers < prevTiers.length) {
               return newTiers.slice(0, numberOfTiers);
@@ -80,14 +80,14 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
       
 
       const updateTierDimensions = (elementId: number, dimensionType: keyof Dimensions, value: string) => {
-        const dimensionValue = parseFloat(value); 
+        const newValue = value.replace(/,/g, '.');
         setTiers(prevTiers => prevTiers.map((tier, index) => {
           if (index === elementId) {
             return {
               ...tier,
               dimensions: {
                 ...tier.dimensions,
-                [dimensionType]: isNaN(dimensionValue) ? 0 : dimensionValue,
+                [dimensionType]: newValue,
               },
             };
           }
@@ -187,8 +187,8 @@ function ShelfCreator({...props }, ref: React.Ref<HTMLDivElement>){
   
   const changeSameSizeOfTiers= (value : boolean)=>{
     const height =   Number(shelfHeight)/numberOfTiers;
-    const length =  Number(shelfLength)/numberOfTiers;
-    const width =   Number(shelfWidth)/numberOfTiers;
+    const length = shelfLength;
+    const width =  shelfWidth;
     setSameSizeOfTiers(value);
     const updatedTiers = tiers.map((tier, index) => ({    
         ...tier, 

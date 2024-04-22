@@ -134,7 +134,7 @@ function Products() {
         <GreenText> add new</GreenText>
         <Line />
         <Image src="/pointer.svg" alt="pointer" width="0.8em" opacity="0.8"></Image>
-        <SmallText onClick={() => { setShowProductCreator(true) }}>manually</SmallText>
+        <SmallText onClick={() => { setShowProductCreator(true); setEditProduct(null); }}>manually</SmallText>
         <SmallLine />
         <AbsoluteContainer>
           <Flex align="center">

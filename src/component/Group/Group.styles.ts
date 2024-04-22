@@ -31,7 +31,7 @@ display: flex;
 flex-wrap: wrap;
 gap:1em;
 margin-top: 5em;
-justify-content: center;
+
 `;
 
 export const GroupItem = styled.div`
@@ -73,6 +73,7 @@ padding-right:0.7em;
 padding-top:0.7em;
 justify-content: space-between;
 flex-direction: row;
+gap:1em;
 `;
 
 export const Input = styled.input<{ isValid: boolean| undefined }>`

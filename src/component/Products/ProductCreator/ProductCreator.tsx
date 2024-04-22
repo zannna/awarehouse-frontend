@@ -22,10 +22,10 @@ function ProductCreator({ setShowProductCreator, products, setProducts, editProd
   const [errorPopup, setErrorPopup] = useState<string | null>(null);
   const [productData, setProductData] = useState<ProductCreation>({
     title: '',
-    amountGroup: 0,
+    amountGroup: '',
     groupId: '',
-    price: { amount: 0, currency: 'PLN' },
-    dimensions: { width: 0, height: 0, length: 0 },
+    price: { amount: '', currency: 'PLN' },
+    dimensions: { width: '', height: '', length: '' },
     productWarehouses: [],
     image: ''
   });
@@ -38,16 +38,16 @@ useEffect(() => {
       setProductData({
         id: editProduct?.id || '',
         title: editProduct?.title || '',
-        amountGroup: editProduct?.amountGroup || 0,
+        amountGroup: editProduct?.amountGroup || '',
         price: {
-          amount: editProduct?.price?.amount || 0,
+          amount: editProduct?.price?.amount || '',
           currency: editProduct?.price?.currency || '',
         },
         groupId: '',
         dimensions: {
-          width: editProduct?.dimensions?.width || 0,
-          height: editProduct?.dimensions?.height || 0,
-          length: editProduct?.dimensions?.length || 0,
+          width: editProduct?.dimensions?.width || '',
+          height: editProduct?.dimensions?.height || '',
+          length: editProduct?.dimensions?.length || '',
         },
         productWarehouses: [],
         image: editProduct?.image || ''
@@ -77,13 +77,20 @@ useEffect(() => {
   };
 
   const removeWarehouseElement = (id: number) => {
-    setWarehousesElements(warehouses => warehouses.filter(warehouseId => warehouseId !== id));
-    setSelectedWarehouses(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(id);
-      return newMap;
+    console.log('Before removal:', warehousesElements); 
+    setWarehousesElements(warehouses => {
+        const filtered = warehouses.filter(warehouseId => warehouseId !== id);
+        console.log('After removal:', filtered);
+        return filtered;
     });
-  };
+    productWarehouses.delete(id);
+    setSelectedWarehouses(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(id);
+        console.log('Updated map:', newMap);
+        return newMap;
+    });
+};
 
   useEffect(() => {
     const fetchWarehouses = async () => {
@@ -119,13 +126,12 @@ useEffect(() => {
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value);
-    console.log("handlePriceChange called", newValue);
+    const newValue = e.target.value.replace(/,/g, '.');
     setProductData(prevData => ({
       ...prevData,
       price: {
         ...prevData.price,
-        amount: isNaN(newValue) ? 0 : newValue
+        amount: newValue
 
       }
     }))
@@ -133,13 +139,13 @@ useEffect(() => {
 
   const handleDimensionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const dimensionValue = parseFloat(value);
+    const newValue = e.target.value.replace(/,/g, '.');
 
     setProductData(prevData => ({
       ...prevData,
       dimensions: {
         ...prevData.dimensions,
-        [name]: isNaN(dimensionValue) ? 0 : dimensionValue
+        [name]: newValue 
       }
     }));
   };
@@ -182,7 +188,7 @@ useEffect(() => {
     const warehouses = Array.from(productWarehouses.values()).filter(wh => {
       return wh.warehouseId || wh.shelfNumber || wh.tierNumber || wh.amount;
     });
-    console.log(groupId)
+    console.log(productWarehouses)
     if (editProduct) {
       updateProduct(keycloak.token, file, {
         ...productData,
@@ -198,6 +204,7 @@ useEffect(() => {
         });
         setProducts(updatedProducts);
         console.log(fetchedProduct);
+        setShowProductCreator(false);
       }).catch((error: any) => {
         if (error && typeof error.message === 'string') {
           setErrorPopup(error.message);
@@ -249,7 +256,7 @@ useEffect(() => {
             </Flex>
             <Flex gap="1em">
               price
-              <ShortCreationInput value={productData.price.amount} onChange={event => handlePriceChange(event)}></ShortCreationInput>
+              <ShortCreationInput value={productData.price.amount} onChange={event => handlePriceChange(event)}  type="text"></ShortCreationInput>
               <Selector items={currencyMap} selected={selectedCurrency} setSelected={setSelectedCurrency} ></Selector>
             </Flex>
             <Flex gap="1em">
@@ -310,7 +317,7 @@ useEffect(() => {
 
 
           <Flex gap="4em" marginBottom='4em' marginTop='2em'>
-            <CancelButton onClick={() => { setShowProductCreator(false) }}>
+            <CancelButton onClick={() => { setShowProductCreator(false); setEditProduct({}); }}>
               cancel
             </CancelButton>
             <CreateButton onClick={() => sendCreationProductRequest()}>

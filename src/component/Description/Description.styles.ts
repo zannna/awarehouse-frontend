@@ -17,7 +17,7 @@ display: flex;
 flex-direction: column;
 align-items: center;
 gap:7em;
-width:60%;
+width:80%;
 `;
 
 export const Header = styled.div`
@@ -76,7 +76,6 @@ export const  TextContainer = styled.div`
 display: flex;
 gap: 3em;
 justify-content: center;
-align-items: center;
 margin-top: 1em;
 `;
 export const  DescriptionGreetingText = styled.div`

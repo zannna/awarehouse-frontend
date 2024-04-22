@@ -38,10 +38,11 @@ padding: 1em;
 justify-content: space-between;
  `;
 
- export const ProductGrid = styled.div`
+export const ProductGrid = styled.div`
+ width: 100%;
   display: grid;
-  grid-template-columns: 30% 30% 20% 20%;
-  gap: 5em; 
+  grid-template-columns: 0.5fr 1fr 1.5fr 0.5fr;
+  gap: 5em;
   grid-template-areas: 
-  "photo id title amount"; 
-  `;
+    "photo id title amount";
+`;

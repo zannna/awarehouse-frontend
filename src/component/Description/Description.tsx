@@ -9,7 +9,7 @@ function Description() {
                 A<Logo>warehouse</Logo>
             </LogoContainer>
             <Flex justify='flex-end' gap='2em'>
-                <LoginButton onClick={()=>navigate("/product")}>LOGIN</LoginButton>
+                <LoginButton onClick={()=>navigate("/option")}>LOGIN</LoginButton>
                 <RegisterButton onClick={()=>navigate("/register")}>REGISTER</RegisterButton>
             </Flex>
         </Header>

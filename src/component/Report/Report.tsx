@@ -53,6 +53,12 @@ function Report() {
             setWarehouses(newWarehouses);
             if (fetchedGroupsAndWarehouses.warehousesWithoutGroup.length > 0) {
                 const firstWarehouse = fetchedGroupsAndWarehouses.warehousesWithoutGroup[0];
+                if(firstWarehouse){
+                    setSelectedWarehouse([firstWarehouse.id, firstWarehouse.name]);
+                }
+            }
+            else if(fetchedGroupsAndWarehouses.groupWithWarehouses.length > 0){
+                const firstWarehouse = fetchedGroupsAndWarehouses.groupWithWarehouses[0].warehouses[0];  
                 setSelectedWarehouse([firstWarehouse.id, firstWarehouse.name]);
             }
             if (fetchedGroupsAndWarehouses.groupWithWarehouses.length > 0) {
@@ -79,6 +85,9 @@ function Report() {
         createReport(keycloak.token, reportData)
   .then(response => {
     setShowReportCreation(false);
+    if(response){
+        setReports([...reports, response]);
+    }
   })
   .catch(error => {
     setErrorPopup(error.message);
@@ -143,17 +152,17 @@ function Report() {
                                 </Flex>
                                 <Flex gap='1em'>
                                     <input type='radio'
+                                        value="weekly"
+                                        checked={selectedInterval === "weekly"}
+                                        onChange={handleIntervalChange}
+                                    ></input>weekly
+                                </Flex>
+                                <Flex gap='1em'>
+                                    <input type='radio'
                                         value="monthly"
                                         checked={selectedInterval === "monthly"}
                                         onChange={handleIntervalChange}
                                     ></input>monthly
-                                </Flex>
-                                <Flex gap='1em'>
-                                    <input type='radio'
-                                        value="yearly"
-                                        checked={selectedInterval === "yearly"}
-                                        onChange={handleIntervalChange}
-                                    ></input>yearly
                                 </Flex>
                             </Flex>
                         </CheckboxItem>

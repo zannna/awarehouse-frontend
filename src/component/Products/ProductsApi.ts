@@ -9,13 +9,13 @@ export interface CreateProductData {
     password: string;
 }
 export interface  Price{
-    amount: number;
+    amount: string;
     currency: string;   
 }
 export interface Dimensions{
-    width?: number;
-    height?: number;
-    length?: number;
+    width?: string;
+    height?: string;
+    length?: string;
 }
 export interface ProductWarehouse{
     productWarehouseId?: string;
@@ -32,7 +32,7 @@ export interface Group{
 export interface ProductCreation{
     id?: string;
     title: string;
-    amountGroup: number;
+    amountGroup: string;
     groupId: string;
     price :Price;
     dimensions: Dimensions;
@@ -50,7 +50,7 @@ export interface ProductWarehouseCreationDto{
 export interface Product{
     id? :string;
     title?: string;
-    amountGroup?: number;
+    amountGroup?: string;
     image? :string;
     group?: Group;
     price? :Price;
@@ -301,12 +301,9 @@ export async function getProducts(
         }
 
     export async function getFreePlaces(token: string | undefined, warehouseId: string, freePlaceDto : FreePlaceDto): Promise<PageableResponse<ShelfWithProductsDto[]>> {
-        const requestBody = {
-            freePlaceDto : freePlaceDto,
-        };
         const response = await axiosCoreService.post(
             `${WAREHOUSE_PATH}/${warehouseId}${SHELF_PATH}${FREE_PLACE_PATH}`,
-            requestBody,
+            freePlaceDto,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`

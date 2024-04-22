@@ -3,11 +3,13 @@ import { Text, Image  } from "../../styles/globalStyles.styles";
 import {axiosCoreService} from '../../api/axiosConfig';
 import { useKeycloak } from '@react-keycloak/web';
 import { useNavigate } from 'react-router-dom';
+import {  useCookies } from "react-cookie";
 import { useState } from 'react';
 function Join(){
     const { keycloak, initialized } = useKeycloak();
     const TOKEN_PATH = '/sharing-token';
     const [token, setToken] = useState<string>('');
+    const [cookies, setCookie] = useCookies(["warehouseId", "warehouseName"]);
     const navigate = useNavigate();
     const handleJoin = async () => {
         console.log(token);
@@ -17,18 +19,18 @@ function Join(){
             {
                 headers: {
                     'Authorization': `Bearer ${keycloak.token}`
-                  }
+                }
             }
         );
         if(response.status==200){
-            
-            navigate('/product');
+            console.log(response)
+            navigate('/warehouse/selection');
         }
     }
     return(
         <Background>
             <MainContainer>
-                <Text family='Play' color='#47474A' size='1.5em'>join warehouse</Text>
+                <Text family='Play' color='#47474A' size='1.5em'>join warehouse or group</Text>
                 <Text family='Play' color='#47474A'  size='1em'>paste token:</Text>
                 <Input onChange={event => setToken(event.target.value)}></Input>
                 <Image src="/accept.svg" opacity='100%' width='2.5em' height='2.5em' alt="accept" onClick={()=>{handleJoin()}}></Image>

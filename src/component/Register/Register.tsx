@@ -22,7 +22,7 @@ function Register() {
             if (isValid) {
                 setEmail(email);
             }
-        }, 3000);
+        }, 10000);
 
     }
 
@@ -44,8 +44,10 @@ function Register() {
 
 
     function changeRepeatedPassword(repetedPassword: string) {
+        console.log(repetedPassword)
         setTimeout(() => {
             const isValid = password === repetedPassword;
+            console.log( isValid)
             setValidRepeatedPassword(isValid);
             if (isValid) {
                 setRepeatedPassword(repetedPassword);
@@ -54,6 +56,11 @@ function Register() {
     }
 
     async function sendRegisterRequest() {
+        console.log(email);
+        console.log(name);
+        console.log(surname);
+        console.log(password);
+        console.log(repeatedPassword);
         if (email === "" || name === "" || surname === "" || password === "" || repeatedPassword === "") {
             setError("All fields are required");
             return;
@@ -66,7 +73,7 @@ function Register() {
                 password: password
             }
             const resp = await createRegistration(registrationData);
-            navigate('/', { replace: true });
+            navigate('/option', { replace: true });
         }
     }
     useEffect(() => {
@@ -100,6 +107,7 @@ function Register() {
             <InputWrapper>
                 <InputText>password</InputText>
                 <Input
+                    type="password"
                     isValid={validPassword}
                     onChange={event => changePassword(event.target.value)}
                 ></Input>
@@ -112,6 +120,7 @@ function Register() {
             <InputWrapper>
                 <InputText>repeat password</InputText>
                 <Input
+                    type="password"
                     isValid={validRepeatedPassword}
                     onChange={event => changeRepeatedPassword(event.target.value)}
                 ></Input>

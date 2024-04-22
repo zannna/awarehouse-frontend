@@ -7,8 +7,9 @@
     import { useKeycloak } from '@react-keycloak/web';
     import ShelfCreator from "../ShelfCreator/ShelfCreator";
     import Shelf from "./Shelf/Shelf";
-    function ShelfAccordion({ shelves, setShelves, row, updateShelfStateAfterTierRemoval, updateShelvesAfterShelfRemoval }: {
+    function ShelfAccordion({ shelves, setShelves, addShelf, row, updateShelfStateAfterTierRemoval, updateShelvesAfterShelfRemoval }: {
         shelves: ShelfDto[],
+        addShelf: (shelves: ShelfDto) => void,
         setShelves: (shelves: ShelfDto[]) => void,
          row: number,
         updateShelfStateAfterTierRemoval: (shelfId: string, tierId: string) => void, updateShelvesAfterShelfRemoval: (shelfId: string) => void
@@ -70,7 +71,7 @@
             ))}
             <div ref={myRef}>
                 {newShelf &&
-                    <ShelfCreator setNewShelf={setNewShelf} addShelf={addNewShelf} row={row} editShelf={modifyShelf} setEditShelf={setModifyShelf}/>}
+                    <ShelfCreator setNewShelf={setNewShelf} addShelf={addShelf} row={row} editShelf={modifyShelf} setEditShelf={setModifyShelf}/>}
             </div>
         </>
         )

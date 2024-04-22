@@ -30,7 +30,7 @@ reportInterval: string;
 email: string;
 entityName?: string;
 }
-export async function createReport(token: string|undefined, report: ReportData) : Promise<Response>{
+export async function createReport(token: string|undefined, report: ReportData) : Promise<ReportData |null>{
  const response= await fetch( `${CORE_SERVICE}${API_VERSION_URI}${REPORT_PATH}/understock`,{
     method: 'POST',
     headers: {
@@ -44,7 +44,8 @@ export async function createReport(token: string|undefined, report: ReportData) 
     throw new Error(errorData.message || 'An error occurred while creating the report');
   }
    
-  return response;
+  const responseBody = await response.json();
+  return responseBody;
 
 }
 

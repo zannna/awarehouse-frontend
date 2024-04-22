@@ -35,7 +35,7 @@ function WarehouseSelection() {
     return (
     <Background>
         <MainContainer>
-            <Text family='Play' color='#47474A' size='1.6em'>select warehouse:</Text>
+            <Text family='Play' color='#47474A' size='1.2em'>select warehouse:</Text>
             {warehouses.map((warehouse: { id: string; name: string; }) => (
                 <Button key={warehouse.id} onClick={()=>handleWarehouseSelection(warehouse.id, warehouse.name)}>{warehouse.name}</Button>
             ))}

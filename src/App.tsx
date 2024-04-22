@@ -57,13 +57,13 @@ function App() {
             <Group />
           </PrivateRoutes>
         } />
-        <Route path="/group" element={
+        <Route path="/report" element={
           <PrivateRoutes>
-            <Route path="/report" element={<Register />} />
+            <Report />
           </PrivateRoutes>} />
-        <Route path="/group" element={
+        <Route path="/option" element={
           <PrivateRoutes>
-            <Route path="/option" element={<Options />} />
+            <Options/>
           </PrivateRoutes>} />
         <Route
           path={'/warehouse/creation'}
