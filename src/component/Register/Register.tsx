@@ -84,7 +84,7 @@ function Register() {
             <LogoContainer>
                 A<Text size='0.5em'>warehouse</Text>
             </LogoContainer>
-            <BlueText>login</BlueText>
+            <BlueText>register</BlueText>
             < InputWrapper>
                 <InputText>email</InputText>
                 <Input isValid={validEmail}
@@ -133,7 +133,7 @@ function Register() {
             <Text size='0.7em' color='red'>{error != undefined ? error : ''}</Text>
             <Flex justify='center' gap="3em" width="50%" marginTop="2em" marginBottom="3em">
                 <GreyButton onClick={()=>{navigate("/")}}>CANCEL</GreyButton>
-                <BlueButton onClick={() => sendRegisterRequest()}>LOGIN</BlueButton>
+                <BlueButton onClick={() => sendRegisterRequest()}>REGISTER</BlueButton>
             </Flex>
         </LoginContainer>
     </Background>);
