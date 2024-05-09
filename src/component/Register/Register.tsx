@@ -15,52 +15,46 @@ function Register() {
     const [error, setError] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
     function changeEmail(email: string) {
-        setTimeout(() => {
             const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const isValid = pattern.test(email);
-            setValidEmail(isValid);
-            if (isValid) {
-                setEmail(email);
-            }
-        }, 10000);
+            setEmail(email);
+            setTimeout(() => {
+                setValidEmail(isValid);
+            }, 2000); 
 
     }
-
 
     function changePassword(password: string) {
-        setTimeout(() => {
             const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
             const isValid = pattern.test(password);
-            setValidPassword(isValid);
-            if (isValid) {
-                setPassword(password);
-            }
-        }, 4000);
+            setPassword(password);
+            
+            setTimeout(() => {
+                setValidPassword(isValid);
+            }, 2000); 
     }
 
-    useEffect(() => {
-        console.log(validPassword);
-    }, [validPassword])
-
-
     function changeRepeatedPassword(repetedPassword: string) {
-        console.log(repetedPassword)
-        setTimeout(() => {
             const isValid = password === repetedPassword;
-            console.log( isValid)
-            setValidRepeatedPassword(isValid);
-            if (isValid) {
-                setRepeatedPassword(repetedPassword);
-            }
-        }, 1000);
+            setRepeatedPassword(repetedPassword);
+            setTimeout(() => {
+                setValidRepeatedPassword(isValid);
+            }, 2000); 
     }
 
     async function sendRegisterRequest() {
-        console.log(email);
-        console.log(name);
-        console.log(surname);
-        console.log(password);
-        console.log(repeatedPassword);
+        if(!validEmail){
+            setError("Email is not proper");
+            return;
+        }
+        if(!validPassword){
+            setError("Password must be at least 8 characters long and include uppercase and lowercase letters, a number, and a special character.");
+            return;
+        }
+        if(!validRepeatedPassword || repeatedPassword !== password){
+            setError("Repeated password is not proper");
+            return;
+        }
         if (email === "" || name === "" || surname === "" || password === "" || repeatedPassword === "") {
             setError("All fields are required");
             return;
@@ -76,9 +70,7 @@ function Register() {
             navigate('/option', { replace: true });
         }
     }
-    useEffect(() => {
-        console.log(validRepeatedPassword);
-    }, [validRepeatedPassword])
+
     return (<Background>
         <LoginContainer>
             <LogoContainer>
@@ -91,6 +83,11 @@ function Register() {
                     onChange={event => changeEmail(event.target.value)}
                 ></Input>
             </ InputWrapper>
+            {email!='' && validEmail!=undefined && !validEmail && (
+                <Text size='0.8em' color='red'>
+                   Email is not proper 
+                 </Text>
+            )}
             <InputWrapper>
                 <InputText>name</InputText>
                 <Input isValid={true}
@@ -112,7 +109,7 @@ function Register() {
                     onChange={event => changePassword(event.target.value)}
                 ></Input>
             </InputWrapper>
-            {password && !validPassword && (
+            {password!='' && validPassword!=undefined && !validPassword && (
                 <Text size='0.8em' color='red'>
                     Password must be at least 8 characters long and include uppercase and lowercase letters, a number, and a special character.
                 </Text>
@@ -125,7 +122,7 @@ function Register() {
                     onChange={event => changeRepeatedPassword(event.target.value)}
                 ></Input>
             </InputWrapper>
-            {repeatedPassword && !validRepeatedPassword && (
+            {repeatedPassword!='' && validRepeatedPassword!=undefined && !validRepeatedPassword && (
                 <Text size='0.8em' color='red'>
                     The repeated password does not match the original.
                 </Text>
