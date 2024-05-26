@@ -6,8 +6,10 @@ import { Warehouse, getAdminGroups, getWarehouses, createProduct, ProductCreatio
 import { currencyMap } from '../../../constants/MapConstants';
 import { useKeycloak } from '@react-keycloak/web';
 import ErrorPopup from '../../ErrorPopup/ErrorPopup';
-function ProductCreator({ setShowProductCreator, products, setProducts, editProduct, setEditProduct }:
-  { setShowProductCreator: (show: boolean) => void, products: Product[], setProducts: (product: Product[]) => void, setEditProduct: (product: Product | null) => void, editProduct: Product | null }) {
+function ProductCreator({ setShowProductCreator, products, setProducts, editProduct, setEditProduct, reset }:
+  { setShowProductCreator: (show: boolean) => void, products: Product[], setProducts: (product: Product[]) => void, setEditProduct: (product: Product | null) => void, editProduct: Product | null,
+    reset: () => void
+   }) {
   const [groups, setGroups] = useState<Map<string, string>>(new Map());
   const [selectedGroup, setSelectedGroup] = useState<string[] | null>(null);
   const [warehousesElements, setWarehousesElements] = useState<number[]>([]);
@@ -205,6 +207,7 @@ useEffect(() => {
         setProducts(updatedProducts);
         console.log(fetchedProduct);
         setShowProductCreator(false);
+        reset();
       }).catch((error: any) => {
         if (error && typeof error.message === 'string') {
           setErrorPopup(error.message);
@@ -220,6 +223,7 @@ useEffect(() => {
       }).then(fetchedProduct => {
       addProduct(fetchedProduct);
       setShowProductCreator(false)
+      reset();
       }).catch((error: any) => {
         console.log(error);
           setErrorPopup(error?.response?.data?.message || 'Error while creating product');   

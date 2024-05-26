@@ -8,7 +8,9 @@ import {moveProducts, MoveProductsDto,  ProductWarehouseMoveInfo, getWarehouses}
 import { useKeycloak } from '@react-keycloak/web';
 import Selector from '../../Selector/Selector';
 import ErrorPopup from '../../ErrorPopup/ErrorPopup';
-function Move({ products, setShowMoveModal }: { products: Product[], setShowMoveModal: (show: boolean) => void }) {
+function Move({ products, setShowMoveModal, reset }: { products: Product[], setShowMoveModal: (show: boolean) => void,
+    reset: () => void
+ }) {
     const [shelfNumber, setShelfNumber] = useState<number>();
     const [tierNumber, setTierNumber] = useState<number>();
     const { keycloak, initialized } = useKeycloak();
@@ -48,6 +50,7 @@ function Move({ products, setShowMoveModal }: { products: Product[], setShowMove
         console.log(moveProduct)
         moveProducts( keycloak.token, moveProduct).then((status)=>{
             setShowMoveModal(false)
+            reset();
         }).catch((error)=>{setErrorPopup(error.message)})
     
     }

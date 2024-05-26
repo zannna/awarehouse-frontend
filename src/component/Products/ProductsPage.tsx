@@ -127,7 +127,7 @@ function Products() {
     <MainNavigation />
     <ProductWarehouse selectedWarehouses={selectedWarehouses} setSelectedWarehouses={setSelectedWarehouses}
       selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} setActualPage={setActualPage} />
-    <Filter updateSearch={searchConditions} updateSearchConditions={updateSearchConditions} sortConditions={sortConditions} setSortConditions={setSortConditions} />
+    <Filter updateSearch={searchConditions} updateSearchConditions={updateSearchConditions} sortConditions={sortConditions} setSortConditions={setSortConditions} reset={reset} />
     <Flex justify="space-between" width="100%" marginTop='4em' marginBottom='1em'>
       <Flex align="center">
         <Image src="/add.svg" alt="add warehouse" width="1.2em"></Image>
@@ -150,7 +150,7 @@ function Products() {
         </Flex>
       </Flex>
       <Selection selectedProducts={Array.from(selectedProductsMap.values())} setSelectedProductsMap={setSelectedProductsMap} products={products}
-        setProducts={setProducts} setEditProduct={setEditProduct} setShowProductCreator={setShowProductCreator} ></Selection>
+        setProducts={setProducts} setEditProduct={setEditProduct} setShowProductCreator={setShowProductCreator} reset={reset}></Selection>
     </Flex>
     <ProductsTable>
       <ProductTr isSelected={false}>
@@ -204,7 +204,7 @@ function Products() {
         </ProductTr>
       ))}
 
-      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} products={products} setProducts={setProducts} editProduct={editProduct} setEditProduct={setEditProduct} />}
+      {showProductCreator && <ProductCreator setShowProductCreator={setShowProductCreator} products={products} setProducts={setProducts} editProduct={editProduct} setEditProduct={setEditProduct}  reset={reset}/>}
       <Flex width='100%' justify='flex-end' marginTop='2em'>
         <Pagination actualPage={actualPage} setActualPage={setActualPage} startPage={visiblePageRange.start} endPage={visiblePageRange.end} setVisiblePageRange={setVisiblePageRange} pages={pages}></Pagination>
       </Flex>

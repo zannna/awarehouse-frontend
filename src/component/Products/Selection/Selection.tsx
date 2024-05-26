@@ -7,12 +7,13 @@ import { useState} from 'react';
 import { Product } from '../ProductsApi';
 import {removeProducts} from '../ProductsApi';
 import { useKeycloak } from '@react-keycloak/web';
-function Selection({ selectedProducts, setSelectedProductsMap, products, setProducts, setEditProduct, setShowProductCreator} : 
+function Selection({ selectedProducts, setSelectedProductsMap, products, setProducts, setEditProduct, setShowProductCreator, reset} : 
  {selectedProducts :Product[],
  setSelectedProductsMap: (selectedProducts: Map<number, Product>) => void,
  products: Product[], setProducts: (products: Product[]) => void,
  setEditProduct: (product: Product | null) => void,
- setShowProductCreator: (show :boolean) =>void}){
+ setShowProductCreator: (show :boolean) =>void,
+ reset: () => void}){
 
     const [showMoveModal, setShowMoveModal] = useState(false);
     const [showNoSelectionWarning, setShowNoSelectionWarning] = useState(false);
@@ -42,8 +43,9 @@ function Selection({ selectedProducts, setSelectedProductsMap, products, setProd
           productIds: productIds.length > 0 ? productIds : [],
           productWarehouseIds: productWarehouseIds.length > 0 ? productWarehouseIds : []
         }).then((status) => {
-          if(status==200){
+          if(status==204){
             setProducts(products.filter(product => !selectedProducts.includes(product) ));
+            reset();
           }
         });
       };
@@ -69,7 +71,7 @@ function Selection({ selectedProducts, setSelectedProductsMap, products, setProd
             <SmallText onClick={()=>handleShowMoveModal()} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>move 
             {showNoSelectionWarning && <Warning>Please select at least one product.</Warning>}
             </SmallText>
-            {showMoveModal&& !showNoSelectionWarning  && <Move products={selectedProducts} setShowMoveModal={setShowMoveModal}/>}
+            {showMoveModal&& !showNoSelectionWarning  && <Move products={selectedProducts} setShowMoveModal={setShowMoveModal} reset={reset}/>}
             <SmallLine />
             <Image src="/pen.svg" alt="modify" width="1.5em" height="1.5em"></Image>
             <SmallText onClick={()=> { setEditProduct(selectedProducts[0]);  setShowProductCreator(true)}} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>

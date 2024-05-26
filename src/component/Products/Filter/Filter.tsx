@@ -4,9 +4,10 @@ import {
 import { Flex, Image, Text } from '../../../styles/globalStyles.styles';
 import { useState, useEffect } from 'react';
 
-function Filter({ updateSearch, updateSearchConditions, sortConditions, setSortConditions }: {
+function Filter({ updateSearch, updateSearchConditions, sortConditions, setSortConditions, reset }: {
   updateSearch: { [key: string]: string }, updateSearchConditions: (key: string, value: string) => void,
-  sortConditions: { [key: string]: string }, setSortConditions: (sortConditions: { [key: string]: string }) => void}){
+  sortConditions: { [key: string]: string }, setSortConditions: (sortConditions: { [key: string]: string }) => void,
+  reset:()=>void}){
   const [isOpen, setOpen] = useState(false);
   const [sortConditionsList, setSortConditionsList] = useState<string[]>([]);
 
@@ -85,6 +86,7 @@ function Filter({ updateSearch, updateSearchConditions, sortConditions, setSortC
   const removeSearchCondition = (key: string) => {
     delete updateSearch[key];
     handleSearchInputChange(key, '');
+    reset();
   };
 
   const removeSortCondition = (key: string) => {
